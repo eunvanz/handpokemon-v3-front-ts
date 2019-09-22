@@ -1,0 +1,101 @@
+@import '~antd/lib/style/themes/default.less';
+
+.mon-card {
+  cursor: pointer;
+  font-size: 16px;
+  .ant-card-cover {
+    padding: 6px;
+    .favorite-btn {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      padding: 6px;
+    }
+    .info-btn {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      padding: 6px;
+      color: @primary-color;
+    }
+  }
+  .ant-card-body {
+    padding: 6px;
+    .cost-section {
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .attr-section {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+  }
+  .hp-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    top: 0;
+    left: 0;
+  }
+}
+
+.mon-card-wrapper {
+  &.ant-col {
+    .rank-tag {
+      right: 2px;
+    }
+    .level-tag {
+      left: 2px;
+    }
+  }
+  .rank-tag {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    right: -2px;
+  }
+  .level-tag {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    left: -2px;
+  }
+}
+
+.ant-col {
+  .mon-card-wrapper {
+    .rank-tag {
+      right: 2px;
+    }
+    .level-tag {
+      left: 2px;
+    }
+  }
+}
+
+@media screen and (max-width: @screen-md) {
+  .mon-card {
+    font-size: 14px;
+    .grade-tag {
+      &.basic::before {
+        content: 'B' !important;
+      }
+      &.special::before {
+        content: 'S' !important;
+      }
+      &.rare::before {
+        content: 'R' !important;
+      }
+      &.s-rare::before {
+        content: 'S' !important;
+      }
+      &.elite::before {
+        content: 'E' !important;
+      }
+      &.legend::before {
+        content: 'L' !important;
+      }
+    }
+  }
+}

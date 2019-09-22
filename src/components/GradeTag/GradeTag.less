@@ -1,0 +1,24 @@
+.grade-tag {
+  margin-right: 0;
+  border: none;
+  padding: 0 5px;
+  border-radius: 2px;
+  &.basic::before {
+    content: 'BASIC';
+  }
+  &.special::before {
+    content: 'SPECIAL';
+  }
+  &.rare::before {
+    content: 'RARE';
+  }
+  &.s-rare::before {
+    content: 'S.RARE';
+  }
+  &.elite::before {
+    content: 'ELITE';
+  }
+  &.legend::before {
+    content: 'LEGEND';
+  }
+}

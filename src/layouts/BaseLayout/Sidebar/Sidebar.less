@@ -1,0 +1,18 @@
+@import '~antd/lib/style/themes/default.less';
+
+.hp-sidebar {
+  height: calc(100vh - 64px);
+  width: 250px;
+  position: fixed;
+  background: #001529;
+  transition: left 0.3s;
+  left: 0;
+  z-index: 999;
+  overflow-y: scroll;
+  .user-info {
+    padding: 24px;
+    h4 {
+      color: rgba(255, 255, 255, 0.65);
+    }
+  }
+}

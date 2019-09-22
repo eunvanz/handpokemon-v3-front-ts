@@ -1,0 +1,35 @@
+@import '~antd/lib/style/themes/default.less';
+
+.hp-header {
+  background-color: @primary-color;
+  color: #fff;
+  box-shadow: 0 1px 8px -4px #101010;
+  padding: 16px;
+  position: fixed;
+  width: 100%;
+  .ant-page-header-title-view-extra {
+    right: 16px;
+  }
+  .ant-btn {
+    box-shadow: none;
+    border-radius: 50%;
+  }
+  .logo {
+    margin-left: 12px;
+  }
+}
+
+@media screen and (max-width: @screen-sm) {
+  .hp-header {
+    .logo {
+      display: none;
+    }
+    .ant-page-header-heading-extra {
+      display: block;
+      width: 72px;
+      padding-top: 0;
+      overflow: unset;
+      float: right;
+    }
+  }
+}

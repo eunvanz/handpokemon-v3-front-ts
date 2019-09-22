@@ -1,0 +1,47 @@
+@import '~antd/lib/style/themes/default.less';
+
+.stat-item {
+  .ant-progress {
+    margin-bottom: 12px;
+    .ant-progress-inner,
+    .ant-progress-bg,
+    .ant-progress-success-bg {
+      border-radius: 0;
+      height: 6px;
+    }
+    // .ant-progress-outer {
+    //   padding-right: 40px;
+    // }
+    // .ant-progress-inner {
+    //   background-color: #e8e8e8;
+    // }
+    .ant-progress-bg {
+      background-color: #f9c957;
+    }
+    .ant-progress-success-bg {
+      &.added {
+        background-color: #ff9800;
+      }
+      &.buff {
+        background-color: #4caf50;
+      }
+      &.new-added {
+        background-color: #03a9f4;
+      }
+      &.title-buff {
+        background-color: #ff5722;
+      }
+    }
+    .ant-progress-text {
+      font-weight: 700;
+      color: @primary-color;
+      // position: absolute;
+      // right: 0;
+      // top: 12px;
+    }
+  }
+  .stat-label {
+    font-weight: 700;
+    margin-bottom: 0;
+  }
+}

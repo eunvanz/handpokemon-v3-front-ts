@@ -1,0 +1,44 @@
+@import '~antd/lib/style/themes/default.less';
+
+.hp-base-layout {
+  &.ant-layout {
+    min-height: 100vh;
+  }
+  &.hide-drawer {
+    .hp-sidebar {
+      left: -250px;
+    }
+  }
+  .hp-content-layout {
+    transition: padding-left 0.3s;
+    padding-top: 67px;
+  }
+}
+
+@media screen and (min-width: @screen-lg) {
+  .hp-base-layout {
+    &.show-drawer {
+      .hp-content-layout {
+        padding-left: 250px;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: @screen-lg) {
+  .hp-base-layout {
+    &.show-drawer {
+      .hp-sidebar-mask {
+        position: fixed;
+        top: 64px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 999;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.65);
+        transition: background-color 0.3s;
+      }
+    }
+  }
+}

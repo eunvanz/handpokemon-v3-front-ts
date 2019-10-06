@@ -1,4 +1,4 @@
-import { types } from 'mobx-state-tree';
+import { types, SnapshotOut } from 'mobx-state-tree';
 import Achievement from './achievement';
 
 const UserAchievement = types.model('UserAchievement', {
@@ -11,5 +11,7 @@ const UserAchievement = types.model('UserAchievement', {
   updatedAt: types.string,
   achievement: Achievement,
 });
+
+export type IUserAchievement = SnapshotOut<typeof UserAchievement>;
 
 export default UserAchievement;

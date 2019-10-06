@@ -1,4 +1,4 @@
-import { types, SnapshotOut } from 'mobx-state-tree';
+import { types, SnapshotOut, Instance } from 'mobx-state-tree';
 
 const Code = types.model('Code', {
   masterCd: types.string,
@@ -9,6 +9,7 @@ const Code = types.model('Code', {
   updatedAt: types.string,
 });
 
-export type ICode = SnapshotOut<typeof Code>;
+export type ICodeSnapshotOut = SnapshotOut<typeof Code>;
+export type ICodeInstance = Instance<typeof Code>;
 
 export default Code;

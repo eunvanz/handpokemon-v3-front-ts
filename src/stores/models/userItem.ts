@@ -1,4 +1,4 @@
-import { types, SnapshotOut } from 'mobx-state-tree';
+import { types, Instance } from 'mobx-state-tree';
 import Item from './item';
 
 const UserItem = types.model({
@@ -11,6 +11,6 @@ const UserItem = types.model({
   item: Item,
 });
 
-export type IUserItem = SnapshotOut<typeof UserItem>;
+export type IUserItemInstance = Instance<typeof UserItem>;
 
 export default UserItem;

@@ -1,17 +1,17 @@
 import React, { useContext, useCallback } from 'react';
-import { observer } from 'mobx-react';
 import AppContext from '../../contexts/AppContext';
 import BaseLayoutView from './BaseLayoutView';
 import { getSnapshot } from 'mobx-state-tree';
-import { useRouter } from '../../hooks/useRouter';
 import { ROUTES } from '../../App';
 import { isScreenSize } from '../../libs/screenSize';
 import { DRAWER_DEFAULT_OPEN_SCREEN_SIZE } from '../../constants/styles';
 import ConfirmModal from '../../components/ConfirmModal/index';
+import { useHistory } from 'react-router';
+import { observer } from 'mobx-react';
 
 const BaseLayoutContainer: React.FC = ({ children }) => {
   const { uiStore, userStore } = useContext(AppContext);
-  const { history } = useRouter();
+  const history = useHistory();
 
   const handleOnToggleDrawer = (show: boolean) => {
     show ? uiStore.showDrawer() : uiStore.hideDrawer();

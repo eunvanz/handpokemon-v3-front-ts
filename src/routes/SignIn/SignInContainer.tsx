@@ -1,18 +1,17 @@
 import React, { useContext, useCallback } from 'react';
-import { observer } from 'mobx-react';
 import AppContext from '../../contexts/AppContext';
 import SignInView from './SignInView';
 import { Form } from 'antd';
 import { getSnapshot } from 'mobx-state-tree';
 import { WrappedFormInternalProps } from 'antd/lib/form/Form';
-import { useRouter } from '../../hooks/useRouter';
 import MessageModal, {
   MessageModalType,
 } from '../../components/MessageModal/MessageModal';
+import { useHistory } from 'react-router';
 
 const SignInContainer = ({ form }: WrappedFormInternalProps<any>) => {
   const { userStore } = useContext(AppContext);
-  const { history } = useRouter();
+  const history = useHistory();
 
   const handleOnClickLogin = useCallback(() => {
     form.validateFields(async (err, values) => {
@@ -40,4 +39,4 @@ const SignInContainer = ({ form }: WrappedFormInternalProps<any>) => {
   );
 };
 
-export default Form.create()(observer(SignInContainer));
+export default Form.create()(SignInContainer);

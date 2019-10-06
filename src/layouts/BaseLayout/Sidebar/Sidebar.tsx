@@ -2,14 +2,14 @@ import React, { useState, useCallback, useEffect, memo } from 'react';
 import { Menu, Icon, List, Avatar, Tag } from 'antd';
 import './Sidebar.less';
 import CreditTag from '../../../components/CreditTag';
-import { IUser } from '../../../stores/models/user';
-import { useRouter } from '../../../hooks/useRouter';
-import { IUserItem } from '../../../stores/models/userItem';
+import { IUserInstance } from '../../../stores/models/user';
+import { IUserItemInstance } from '../../../stores/models/userItem';
 import { CreditType } from '../../../constants/rules';
+import { useHistory } from 'react-router';
 
 interface ISidebarViewProps {
-  user?: IUser;
-  userItems?: IUserItem[];
+  user?: IUserInstance;
+  userItems?: IUserItemInstance[];
   onChangeRoute: (route: string) => void;
   refreshUser: () => void;
 }
@@ -20,7 +20,7 @@ const SidebarView = ({
   refreshUser,
   userItems,
 }: ISidebarViewProps) => {
-  const { history } = useRouter();
+  const history = useHistory();
   const [selectedKeys, setSelectedKeys] = useState([history.location.pathname]);
 
   useEffect(() => {

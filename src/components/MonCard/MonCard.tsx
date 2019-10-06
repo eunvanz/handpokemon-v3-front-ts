@@ -1,5 +1,4 @@
 import React, {
-  memo,
   useCallback,
   useMemo,
   useState,
@@ -7,7 +6,7 @@ import React, {
   ReactElement,
 } from 'react';
 import { Card, Col, Icon } from 'antd';
-import { getMonImageUrl } from '../../libs/hpUtils';
+import { getMonImageUrl, isCollection } from '../../libs/hpUtils';
 import './MonCard.less';
 import GradeTag from '../GradeTag';
 import AttrTag from '../AttrTag';
@@ -17,33 +16,29 @@ import MonModal from '../MonModal';
 import RankTag from '../RankTag';
 import LevelTag from '../LevelTag';
 import { COLOR } from '../../constants/styles';
-import { IMon } from '../../stores/models/mon';
-import { IUser } from '../../stores/models/user';
-import { ICollection } from '../../stores/models/collection';
+import { IMonInstance } from '../../stores/models/mon';
+import { ICollectionInstance } from '../../stores/models/collection';
 import { ColProps } from 'antd/lib/col';
+import { observer } from 'mobx-react';
+import { IUserInstance } from '../../stores/models/user';
 
-interface IMonCardProps extends ComponentProps<'div'> {
-  mon?: ICollection | IMon;
+interface IMonCardProps {
+  mon?: ICollectionInstance | IMonInstance;
   hideInfo?: boolean;
   codes: any[];
   onClick?: () => void;
   withWrapper?: boolean;
-  prevMon?: IMon;
+  prevMon?: IMonInstance;
   mixable?: boolean;
-  onClickMix?: (mon: ICollection) => void;
+  onClickMix?: (mon: ICollectionInstance) => void;
   evolutable?: boolean;
-  onClickEvolute?: (mon: ICollection) => void;
+  onClickEvolute?: (mon: ICollectionInstance) => void;
   isMock?: boolean;
   overlay?: ReactElement;
   bottomComponent?: ReactElement;
-  user?: IUser;
-  toggleFavorite?: (mon: ICollection) => Promise<any>;
+  user?: IUserInstance;
   selectable?: boolean;
   selected?: boolean;
-}
-
-function isCollection(mon: ICollection | IMon): mon is ICollection {
-  return (mon as ICollection).mon !== undefined;
 }
 
 const MonCard = ({
@@ -61,48 +56,42 @@ const MonCard = ({
   overlay,
   bottomComponent,
   user,
-  toggleFavorite,
   selectable,
   selected,
   ...restProps
 }: IMonCardProps) => {
   const [showMonModal, setShowMonModal] = useState(false);
-  const [favorite, setFavorite] = useState(
-    mon && isCollection(mon) && mon.favorite === 1
-  );
-
-  const handleOnClickFavorite = useCallback(
-    e => {
-      e.stopPropagation();
-      if (mon && isCollection(mon) && toggleFavorite) {
-        toggleFavorite(mon).then(() => setFavorite(!favorite));
-      }
-    },
-    [toggleFavorite, mon, favorite]
-  );
 
   const handleOnClickInfo = useCallback(e => {
     e.stopPropagation();
     setShowMonModal(true);
   }, []);
 
+  const handleOnToggleFavorite = useCallback(
+    e => {
+      e.stopPropagation();
+      mon && isCollection(mon) && mon.toggleFavorite();
+    },
+    [mon]
+  );
+
   const renderCover = useCallback(() => {
     if (!hideInfo && !isMock) {
       return (
         <div style={{ position: 'relative' }}>
           <img
-            src={getMonImageUrl(mon) || imgEmpty}
+            src={(mon && getMonImageUrl(mon)) || imgEmpty}
             alt='손켓몬 이미지'
             style={{ width: '100%' }}
           />
-          {mon && (mon as ICollection).mon && (
+          {mon && isCollection(mon) && (
             <Icon
-              onClick={handleOnClickFavorite}
+              onClick={handleOnToggleFavorite}
               className='favorite-btn cursor-pointer'
               type='heart'
               theme='filled'
               style={{
-                color: favorite ? COLOR.RED : COLOR.GRAY,
+                color: mon.favorite ? COLOR.RED : COLOR.GRAY,
               }}
             />
           )}
@@ -123,20 +112,12 @@ const MonCard = ({
         </div>
       );
     }
-  }, [
-    mon,
-    hideInfo,
-    isMock,
-    favorite,
-    handleOnClickFavorite,
-    selectable,
-    handleOnClickInfo,
-  ]);
+  }, [mon, hideInfo, isMock, selectable, handleOnClickInfo]);
 
   const renderAttr = useCallback(() => {
     if (mon && !isMock) {
       const thisMon = (isCollection(mon) && mon.mon) || mon;
-      const { gradeCd } = thisMon as IMon;
+      const { gradeCd } = thisMon as IMonInstance;
       return (
         <>
           <GradeTag gradeCd={gradeCd} isMock={isMock} />
@@ -188,7 +169,7 @@ const MonCard = ({
   }, [mon]);
 
   const handleOnClickMix = useCallback(
-    (mon: ICollection) => {
+    (mon: ICollectionInstance) => {
       setShowMonModal(false);
       onClickMix && onClickMix(mon);
     },
@@ -196,7 +177,7 @@ const MonCard = ({
   );
 
   const handleOnClickEvolute = useCallback(
-    (mon: ICollection) => {
+    (mon: ICollectionInstance) => {
       setShowMonModal(false);
       onClickEvolute && onClickEvolute(mon);
     },
@@ -232,7 +213,7 @@ const MonCard = ({
               isMock
                 ? null
                 : mon
-                ? ((isCollection(mon) && mon.mon) || (mon as IMon)).cost
+                ? ((isCollection(mon) && mon.mon) || (mon as IMonInstance)).cost
                 : null
             }
             isMock={isMock}
@@ -260,4 +241,4 @@ const MonCard = ({
   );
 };
 
-export default memo(MonCard);
+export default observer(MonCard);

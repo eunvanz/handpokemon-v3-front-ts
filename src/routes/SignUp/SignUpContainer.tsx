@@ -1,6 +1,4 @@
 import React, { useContext, useCallback, useState, useEffect } from 'react';
-import { observer } from 'mobx-react';
-import { useRouter } from '../../hooks/useRouter';
 import AppContext from '../../contexts/AppContext';
 import api from '../../api';
 import SignUpView from './SignUpView';
@@ -9,11 +7,15 @@ import { WrappedFormUtils } from 'antd/lib/form/Form';
 import SpinContainer from '../../components/SpinContainer';
 import MessageModal from '../../components/MessageModal/index';
 import { MessageModalType } from '../../components/MessageModal/MessageModal';
+import { useHistory } from 'react-router';
+import { ICollectionSnapshotOut } from '../../stores/models/collection';
 
 const SignUpContainer = ({ form }: { form: WrappedFormUtils }) => {
-  const { history } = useRouter();
+  const history = useHistory();
   const { userStore, codeStore } = useContext(AppContext);
-  const [startPicks, setStartPicks] = useState(undefined);
+  const [startPicks, setStartPicks] = useState<
+    ICollectionSnapshotOut[] | undefined
+  >(undefined);
   const { codes } = codeStore;
 
   useEffect(() => {
@@ -29,7 +31,7 @@ const SignUpContainer = ({ form }: { form: WrappedFormUtils }) => {
   }, []);
 
   const handleOnPick = useCallback(async () => {
-    const startPicks = await api.collection.getStartPick();
+    const startPicks = await api.collection.getStartPicks();
     return setStartPicks(startPicks);
   }, []);
 
@@ -77,4 +79,4 @@ const SignUpContainer = ({ form }: { form: WrappedFormUtils }) => {
   );
 };
 
-export default Form.create()(observer(SignUpContainer));
+export default Form.create()(SignUpContainer);

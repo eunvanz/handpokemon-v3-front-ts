@@ -1,4 +1,4 @@
-import { types, SnapshotOut } from 'mobx-state-tree';
+import { types, SnapshotOut, Instance, SnapshotIn } from 'mobx-state-tree';
 
 const Mon = types.model('Mon', {
   id: types.identifierNumber,
@@ -25,6 +25,8 @@ const Mon = types.model('Mon', {
   updatedAt: types.string,
 });
 
-export type IMon = SnapshotOut<typeof Mon>;
+export type IMonSnapshotOut = SnapshotOut<typeof Mon>;
+export type IMonSnapshotIn = SnapshotIn<typeof Mon>;
+export type IMonInstance = Instance<typeof Mon>;
 
 export default Mon;

@@ -17,7 +17,7 @@ const GradeTag = ({ gradeCd, style, isMock, ...restProps }: IGradeTagProps) => {
     <Tag
       className={classNames(
         'grade-tag',
-        isMock ? null : getClassNameFromGradeCd(gradeCd)
+        isMock || !gradeCd ? null : getClassNameFromGradeCd(gradeCd)
       )}
       style={Object.assign(
         {},

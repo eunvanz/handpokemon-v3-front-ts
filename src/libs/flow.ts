@@ -1,7 +1,7 @@
 import { flow as _flow } from 'mobx-state-tree';
 import { FlowReturnType } from 'mobx-state-tree/dist/core/flow';
 
-//https://github.com/mobxjs/mobx-state-tree/issues/1378
+// https://github.com/mobxjs/mobx-state-tree/issues/1378
 
 export type Flow = <T extends Promise<any>, R, Args extends any[]>(
   generator: (

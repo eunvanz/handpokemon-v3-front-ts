@@ -1,9 +1,26 @@
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Row, Card, Affix, Button, Col, Empty } from 'antd';
 import { Waypoint } from 'react-waypoint';
-import MonCard from '../../components/MonCard';
+import MonCard from '../MonCard';
 import { isEmpty } from '../../libs/commonUtils';
 import BottomTotal from '../BottomTotal';
+import { ICollectionInstance } from '../../stores/models/collection';
+import { ICodeSnapshotOut } from '../../stores/models/code';
+import { ISelectConfigs } from '../../routes/Collection/CollectionView';
+import { IUserInstance } from '../../stores/models/user';
+
+interface ICollectionListProps {
+  list: ICollectionInstance[];
+  codes: ICodeSnapshotOut[];
+  mixable?: boolean;
+  onClickMix?: (targetCol: ICollectionInstance) => void;
+  selectable?: boolean;
+  selectConfigs?: ISelectConfigs;
+  evolutable?: boolean;
+  onClickEvolute?: (targetCol: ICollectionInstance) => void;
+  user: IUserInstance;
+  selectedMons?: ICollectionInstance[];
+}
 
 const CollectionList = ({
   list,
@@ -11,13 +28,12 @@ const CollectionList = ({
   mixable,
   onClickMix,
   selectable,
-  selectOptions, // { message, onSelect, onCancel }
+  selectConfigs, // { message, onSelect, onCancel }
   evolutable,
   onClickEvolute,
   user,
-  monCardProps,
-  selectedMons
-}) => {
+  selectedMons,
+}: ICollectionListProps) => {
   const [page, setPage] = useState(1);
 
   const onLoadNextPage = useCallback(() => {
@@ -27,21 +43,21 @@ const CollectionList = ({
   // selectable일 때 카드 클릭 시 이벤트 핸들러
   const handleOnClickMonCard = useCallback(
     mon => {
-      selectOptions.onSelect(mon);
+      selectConfigs && selectConfigs.onSelect(mon);
     },
-    [selectOptions]
+    [selectConfigs]
   );
 
   return (
     <>
-      {selectable && (
+      {selectable && selectConfigs && (
         <Affix offsetTop={60}>
           <Card style={{ marginBottom: 12 }}>
-            <div className='pull-left'>{selectOptions.message}</div>
+            <div className='pull-left'>{selectConfigs.message}</div>
             <div className='pull-right'>
               <Button
                 type='danger'
-                onClick={selectOptions.onCancel}
+                onClick={selectConfigs.onCancel}
                 icon='close'
                 size='small'
               >
@@ -68,15 +84,17 @@ const CollectionList = ({
             onClickEvolute={onClickEvolute}
             mixable={mixable}
             evolutable={evolutable}
-            onClick={selectable ? () => handleOnClickMonCard(col) : null}
+            onClick={selectable ? () => handleOnClickMonCard(col) : undefined}
             hideInfo={isEmpty(col.mon)}
             user={user}
             selectable={selectable}
             bottomComponent={
-              selectable ? <BottomTotal col={col} user={user} /> : null
+              selectable ? <BottomTotal col={col} user={user} /> : undefined
             }
-            {...monCardProps}
-            selected={selectedMons.filter(mon => mon.id === col.id).length > 0}
+            selected={
+              selectedMons &&
+              selectedMons.filter(mon => mon.id === col.id).length > 0
+            }
           />
         ))}
         {list.length >= 24 && (
@@ -89,4 +107,4 @@ const CollectionList = ({
   );
 };
 
-export default memo(CollectionList);
+export default CollectionList;

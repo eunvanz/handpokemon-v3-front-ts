@@ -5,9 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { ICodeInstance, ICodeSnapshotOut } from '../../stores/models/code';
-import { ICollectionFilter } from '../../stores/models/collectionFilter';
-import { FilterKey } from '../../stores/collectionFilterStore';
+import { ICodeInstance } from '../../stores/models/code';
 import { ICollectionInstance } from '../../stores/models/collection';
 import ContentWrapper from '../../components/ContentWrapper/index';
 import SpinContainer from '../../components/SpinContainer';
@@ -20,10 +18,10 @@ import { MASTER_CD } from '../../constants/codes';
 import { GRADE_STYLE } from '../../constants/styles';
 import CollectionList from '../../components/CollectionList';
 import { observer } from 'mobx-react';
-import { IMonInstance } from '../../stores/models/mon';
-import { IUserInstance } from '../../stores/models/user';
 import AppContext from '../../contexts/AppContext';
 import { useParams } from 'react-router';
+import FloatingFilterDrawer from '../../components/FloatingFilterDrawer';
+import { toJS } from 'mobx';
 
 interface ICollectionStateSectionProps {
   codes: ICodeInstance[];
@@ -80,100 +78,34 @@ export interface ISelectConfigs {
 }
 
 const CollectionView = () => {
-  const {
-    userStore,
-    collectionFilterStore,
-    codeStore,
-    collectionStore,
-  } = useContext(AppContext);
-  const { user, userCollections } = userStore;
-  const { codes } = codeStore;
-  const { collectionFilter, updateFilter } = collectionFilterStore;
+  const { userStore, codeStore, collectionStore } = useContext(AppContext);
   const { id } = useParams();
-  const { mons } = collectionStore;
-
-  const collections = useMemo(() => {
-    if (id === 'user') {
-      return userCollections;
-    }
-  }, [id, userCollections]);
+  const { user, userCollections } = userStore;
+  const { codes, isCodeLoaded } = codeStore;
+  const { mons, collections } = collectionStore;
 
   const selectable = useMemo(() => {
     return false;
   }, []);
 
-  useEffect(() => {
-    if (codes && !collectionFilter) {
-      collectionFilterStore.setFilter({
-        has: [{ label: '보유', value: 'Y' }, { label: '미보유', value: 'N' }],
-        gradeCd: (codeStore.findMasterCdGroup(
-          MASTER_CD.MON_GRADE
-        ) as ICodeSnapshotOut[]).map((item: ICodeSnapshotOut) => ({
-          label: item.detailCdNm,
-          value: item.detailCd,
-        })),
-        mainAttrCd: (codeStore.findMasterCdGroup(
-          MASTER_CD.MON_ATTRS
-        ) as ICodeSnapshotOut[]).map(item => ({
-          label: item.detailCdNm,
-          value: item.detailCd,
-        })),
-        subAttrCd: [{ label: '없음', value: '' }].concat(
-          (codeStore.findMasterCdGroup(
-            MASTER_CD.MON_ATTRS
-          ) as ICodeSnapshotOut[]).map(item => ({
-            label: item.detailCdNm,
-            value: item.detailCd,
-          }))
-        ),
-        cost: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(item => ({
-          label: item,
-          value: Number(item),
-        })),
-        rankCd: [{ label: '없음', value: '' }].concat(
-          (codeStore.findMasterCdGroup(
-            MASTER_CD.MON_RANK
-          ) as ICodeSnapshotOut[]).map(item => ({
-            label: item.detailCdNm,
-            value: item.detailCd,
-          }))
-        ),
-        generation: ['1', '2', '3', '4', '5', '6', '7', '8'].map(item => ({
-          label: item,
-          value: Number(item),
-        })),
-        evolutable: [
-          { label: '가능', value: 'Y' },
-          { label: '불가능', value: 'N' },
-        ],
-        defense: [
-          { label: '배치됨', value: 'Y' },
-          { label: '배치안됨', value: 'N' },
-        ],
-      });
-    }
-  }, [codes]); // eslint-disable-line
-
   const monCounts = useMemo(() => {
-    if (collections && mons) {
+    if (collections && mons && codes) {
       const result: { total: number; cnt: number; key: string }[] = [];
-      getDetailCdsInMasterCdGroup(MASTER_CD.MON_GRADE, codes).forEach(
-        (gradeCd: string) => {
-          const item = { total: 0, cnt: 0, key: gradeCd };
-          item.cnt = collections.filter(
-            item => item.mon.gradeCd === gradeCd
-          ).length;
-          item.total = mons.filter(item => item.gradeCd === gradeCd).length;
-          result.push(item);
-        }
-      );
+      (codeStore.findDetailCdsInMasterCdGroup(
+        MASTER_CD.MON_GRADE
+      ) as string[]).forEach((gradeCd: string) => {
+        const item = { total: 0, cnt: 0, key: gradeCd };
+        item.cnt = collections.filter(
+          item => item.mon.gradeCd === gradeCd
+        ).length;
+        item.total = mons.filter(item => item.gradeCd === gradeCd).length;
+        result.push(item);
+      });
       return result;
     } else {
       return null;
     }
-  }, [mons, codes, collections]);
-
-  const onClickMix = useCallback((targetCol: ICollectionInstance) => {}, []);
+  }, [mons, codeStore, collections, codes]);
 
   const selectConfigs = useMemo(() => {
     return {
@@ -183,7 +115,15 @@ const CollectionView = () => {
     };
   }, []);
 
-  const isLoading = !codes || !collectionFilter || !collections || !monCounts;
+  const onClickMix = useCallback((targetCol: ICollectionInstance) => {}, []);
+
+  useEffect(() => {
+    if (id === 'user') {
+      userCollections && collectionStore.setCollections(toJS(userCollections));
+    }
+  }, [id, userCollections, collectionStore]);
+
+  const isLoading = !isCodeLoaded || !collections || !monCounts;
 
   return (
     <ContentWrapper>
@@ -201,6 +141,7 @@ const CollectionView = () => {
           user={user}
         />
       )}
+      <FloatingFilterDrawer />
     </ContentWrapper>
   );
 };

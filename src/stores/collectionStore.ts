@@ -1,5 +1,5 @@
 import { types, cast } from 'mobx-state-tree';
-import Collection, { ICollectionInstance } from './models/collection';
+import Collection, { ICollectionSnapshotOut } from './models/collection';
 import Mon from './models/mon';
 import { flow } from '../libs/flow';
 import api from '../api/index';
@@ -10,7 +10,7 @@ const CollectionStore = types
     mons: types.maybe(types.array(Mon)),
   })
   .actions(self => {
-    const setCollections = (collections: ICollectionInstance[]) => {
+    const setCollections = (collections: ICollectionSnapshotOut[]) => {
       self.collections = cast(collections);
     };
 

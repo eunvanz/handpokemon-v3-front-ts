@@ -1,44 +1,41 @@
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Checkbox } from 'antd';
+import { CheckboxOptionType, CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { CheckboxValueType } from 'antd/lib/checkbox/Group';
+
+interface ICheckGroupProps {
+  checkedList: string[] | number[];
+  onChangeCheckedList: (checkedList: CheckboxValueType[]) => void;
+  optionList: CheckboxOptionType[];
+  disabled: boolean;
+}
 
 const CheckGroup = ({
   checkedList,
   onChangeCheckedList,
   optionList,
-  disabled
-}) => {
-  const [interminate, setInterminate] = useState(false);
-  const [checkAll, setCheckAll] = useState(false);
-
-  useEffect(() => {
-    setCheckAll(checkedList.length === optionList.length);
-  }, [checkedList, optionList]);
-
+  disabled,
+}: ICheckGroupProps) => {
   const onCheckAllChange = useCallback(
-    e => {
+    (e: CheckboxChangeEvent) => {
       onChangeCheckedList(
         e.target.checked ? optionList.map(item => item.value) : []
       );
-      setInterminate(false);
     },
     [optionList, onChangeCheckedList]
   );
 
-  const onChange = checkedList => {
+  const onChange = (checkedList: CheckboxValueType[]) => {
     onChangeCheckedList(checkedList);
-    setInterminate(
-      !!checkedList.length && checkedList.length < optionList.length
-    );
   };
 
   return (
     <div>
       <Checkbox
-        interminate={interminate}
         onChange={onCheckAllChange}
-        checked={checkAll}
+        checked={checkedList.length === optionList.length}
         style={{
-          marginRight: 8
+          marginRight: 8,
         }}
         disabled={disabled}
       >
@@ -54,4 +51,4 @@ const CheckGroup = ({
   );
 };
 
-export default memo(CheckGroup);
+export default CheckGroup;

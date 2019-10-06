@@ -112,7 +112,14 @@ const MonCard = ({
         </div>
       );
     }
-  }, [mon, hideInfo, isMock, selectable, handleOnClickInfo]);
+  }, [
+    mon,
+    hideInfo,
+    isMock,
+    selectable,
+    handleOnClickInfo,
+    handleOnToggleFavorite,
+  ]);
 
   const renderAttr = useCallback(() => {
     if (mon && !isMock) {

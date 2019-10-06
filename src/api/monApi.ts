@@ -1,8 +1,8 @@
 import makeRequest from './makeRequest';
-import { IMonSnapshotIn, IMonSnapshotOut } from '../stores/models/mon';
+import { IMonSnapshotIn } from '../stores/models/mon';
 
 export interface IMonApi {
-  getAllMons: () => Promise<any>;
+  getAllMons: () => Promise<IMonSnapshotIn[]>;
 }
 
 const monApi: IMonApi = {

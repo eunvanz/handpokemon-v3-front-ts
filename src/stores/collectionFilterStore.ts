@@ -2,7 +2,6 @@ import { types, SnapshotOut } from 'mobx-state-tree';
 import CollectionFilter from './models/collectionFilter';
 
 export enum FilterKey {
-  has = 'has',
   gradeCd = 'gradeCd',
   mainAttrCd = 'mainAttrCd',
   subAttrCd = 'subAttrCd',

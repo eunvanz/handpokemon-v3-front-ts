@@ -19,7 +19,6 @@ const FloatingFilterDrawer = () => {
   useEffect(() => {
     if (isCodeLoaded && !collectionFilter) {
       collectionFilterStore.setFilter({
-        has: ['Y'],
         gradeCd: codeStore.findDetailCdsInMasterCdGroup(MASTER_CD.MON_GRADE),
         mainAttrCd: codeStore.findDetailCdsInMasterCdGroup(MASTER_CD.MON_ATTRS),
         subAttrCd: [''].concat(codeStore.findDetailCdsInMasterCdGroup(
@@ -40,7 +39,6 @@ const FloatingFilterDrawer = () => {
   const optionLists = useMemo(() => {
     if (isCodeLoaded) {
       return {
-        has: [{ label: '보유', value: 'Y' }, { label: '미보유', value: 'N' }],
         gradeCd: (codeStore.findMasterCdGroup(
           MASTER_CD.MON_GRADE
         ) as ICodeSnapshotOut[]).map(item => ({
@@ -107,7 +105,6 @@ const FloatingFilterDrawer = () => {
         }
       });
       if (activeKeys.length === 0) {
-        activeKeys.push('has');
         activeKeys.push('gradeCd');
       }
       return {
@@ -122,7 +119,6 @@ const FloatingFilterDrawer = () => {
     }
   }, [collectionFilter, optionLists]);
 
-  console.log('collectionFilter', toJS(collectionFilter));
   return (
     <FloatingDrawer
       icon='filter'
@@ -135,16 +131,6 @@ const FloatingFilterDrawer = () => {
           bordered={false}
           defaultActiveKey={filterActiveInfo.activeKeys}
         >
-          <Collapse.Panel header='보유여부' key={FilterKey.has}>
-            <CheckGroup
-              optionList={optionLists.has}
-              onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(FilterKey.has, checkedList)
-              }
-              checkedList={collectionFilter.has}
-              disabled={collectionFilter.disabled.indexOf(FilterKey.has) > -1}
-            />
-          </Collapse.Panel>
           <Collapse.Panel header='등급' key={FilterKey.gradeCd}>
             <CheckGroup
               optionList={optionLists.gradeCd}

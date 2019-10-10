@@ -2,15 +2,16 @@ import React, { useState, useCallback } from 'react';
 import { Row, Card, Affix, Button, Col, Empty } from 'antd';
 import { Waypoint } from 'react-waypoint';
 import MonCard from '../MonCard';
-import { isEmpty } from '../../libs/commonUtils';
 import BottomTotal from '../BottomTotal';
 import { ICollectionInstance } from '../../stores/models/collection';
 import { ICodeSnapshotOut } from '../../stores/models/code';
 import { ISelectConfigs } from '../../routes/Collection/CollectionView';
 import { IUserInstance } from '../../stores/models/user';
+import { IMonInstance } from '../../stores/models/mon';
+import { isCollection } from '../../libs/hpUtils';
 
 interface ICollectionListProps {
-  list: ICollectionInstance[];
+  list: (ICollectionInstance | IMonInstance)[];
   codes: ICodeSnapshotOut[];
   mixable?: boolean;
   onClickMix?: (targetCol: ICollectionInstance) => void;
@@ -76,7 +77,7 @@ const CollectionList = ({
         )}
         {(list.length >= 24 ? list.slice(0, page * 24) : list).map(col => (
           <MonCard
-            key={col.monId || col.id} // 콜렉션과 몬스터가 섞여있으므로 유니크하기 위해
+            key={!isCollection(col) ? col.id : col.monId} // 콜렉션과 몬스터가 섞여있으므로 유니크하기 위해
             withWrapper
             mon={col}
             codes={codes}
@@ -85,7 +86,7 @@ const CollectionList = ({
             mixable={mixable}
             evolutable={evolutable}
             onClick={selectable ? () => handleOnClickMonCard(col) : undefined}
-            hideInfo={isEmpty(col.mon)}
+            hideInfo={!isCollection(col)}
             user={user}
             selectable={selectable}
             bottomComponent={

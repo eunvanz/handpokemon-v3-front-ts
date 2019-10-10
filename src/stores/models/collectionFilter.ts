@@ -4,7 +4,6 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 
 const CollectionFilter = types
   .model('CollectionFilter', {
-    has: types.array(types.string),
     gradeCd: types.array(types.string),
     mainAttrCd: types.array(types.string),
     subAttrCd: types.array(types.string),

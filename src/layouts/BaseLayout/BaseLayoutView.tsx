@@ -2,15 +2,15 @@ import React, { ReactNode } from 'react';
 import { Layout } from 'antd';
 import classNames from 'classnames';
 import Header from './Header/index';
-import { IUserStore } from '../../stores/userStore';
 import Sidebar from './Sidebar/index';
 import Content from './Content/index';
 import './BaseLayout.less';
+import UserStore from '../../stores/userStore';
 
 interface IBaseLayoutViewProps {
   isDrawerOpen: boolean;
   onToggleDrawer: (show: boolean) => void;
-  userStore?: IUserStore;
+  userStore?: UserStore;
   onClickLogout: () => void;
   onChangeRoute: (route: string) => void;
   refreshUser: () => void;

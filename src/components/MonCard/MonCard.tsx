@@ -16,27 +16,27 @@ import MonModal from '../MonModal';
 import RankTag from '../RankTag';
 import LevelTag from '../LevelTag';
 import { COLOR } from '../../constants/styles';
-import { IMonInstance } from '../../stores/models/mon';
-import { ICollectionInstance } from '../../stores/models/collection';
+import { IMon } from '../../stores/models/monModel';
+import { ICollection } from '../../stores/models/collectionModel';
 import { ColProps } from 'antd/lib/col';
-import { observer } from 'mobx-react';
-import { IUserInstance } from '../../stores/models/user';
+import { observer } from 'mobx-react-lite';
+import { IUser } from '../../stores/models/userModel';
 
 interface IMonCardProps {
-  mon?: ICollectionInstance | IMonInstance;
+  mon?: ICollection | IMon;
   hideInfo?: boolean;
   codes: any[];
   onClick?: () => void;
   withWrapper?: boolean;
-  prevMon?: IMonInstance;
+  prevMon?: IMon;
   mixable?: boolean;
-  onClickMix?: (mon: ICollectionInstance) => void;
+  onClickMix?: (mon: ICollection) => void;
   evolutable?: boolean;
-  onClickEvolute?: (mon: ICollectionInstance) => void;
+  onClickEvolute?: (mon: ICollection) => void;
   isMock?: boolean;
   overlay?: ReactElement;
   bottomComponent?: ReactElement;
-  user?: IUserInstance;
+  user?: IUser;
   selectable?: boolean;
   selected?: boolean;
 }
@@ -124,7 +124,7 @@ const MonCard = ({
   const renderAttr = useCallback(() => {
     if (mon && !isMock) {
       const thisMon = (isCollection(mon) && mon.mon) || mon;
-      const { gradeCd } = thisMon as IMonInstance;
+      const { gradeCd } = thisMon as IMon;
       return (
         <>
           <GradeTag gradeCd={gradeCd} isMock={isMock} />
@@ -176,7 +176,7 @@ const MonCard = ({
   }, [mon]);
 
   const handleOnClickMix = useCallback(
-    (mon: ICollectionInstance) => {
+    (mon: ICollection) => {
       setShowMonModal(false);
       onClickMix && onClickMix(mon);
     },
@@ -184,7 +184,7 @@ const MonCard = ({
   );
 
   const handleOnClickEvolute = useCallback(
-    (mon: ICollectionInstance) => {
+    (mon: ICollection) => {
       setShowMonModal(false);
       onClickEvolute && onClickEvolute(mon);
     },
@@ -220,7 +220,7 @@ const MonCard = ({
               isMock
                 ? null
                 : mon
-                ? ((isCollection(mon) && mon.mon) || (mon as IMonInstance)).cost
+                ? ((isCollection(mon) && mon.mon) || (mon as IMon)).cost
                 : null
             }
             isMock={isMock}

@@ -2,14 +2,14 @@ import React, { useState, useCallback, useEffect, memo } from 'react';
 import { Menu, Icon, List, Avatar, Tag } from 'antd';
 import './Sidebar.less';
 import CreditTag from '../../../components/CreditTag';
-import { IUserInstance } from '../../../stores/models/user';
-import { IUserItemInstance } from '../../../stores/models/userItem';
 import { CreditType } from '../../../constants/rules';
 import { useHistory } from 'react-router';
+import { IUser } from '../../../stores/models/userModel';
+import { IUserItem } from '../../../stores/models/userItemModel';
 
 interface ISidebarViewProps {
-  user?: IUserInstance;
-  userItems?: IUserItemInstance[];
+  user?: IUser;
+  userItems?: IUserItem[];
   onChangeRoute: (route: string) => void;
   refreshUser: () => void;
 }

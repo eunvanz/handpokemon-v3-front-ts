@@ -4,7 +4,7 @@ import FloatingDrawer from '../FloatingDrawer/index';
 import { isScreenSize } from '../../libs/screenSize';
 import CheckGroup from './CheckGroup';
 import { observer } from 'mobx-react';
-import { FilterKey } from '../../stores/collectionFilterStore';
+import { CollectionFilterKey } from '../../stores/collectionStore';
 import AppContext from '../../contexts/AppContext';
 import { MASTER_CD } from '../../constants/codes';
 import { toJS } from 'mobx';
@@ -12,15 +12,20 @@ import { ICodeSnapshotOut } from '../../stores/models/code';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 
 const FloatingFilterDrawer = () => {
-  const { codeStore, collectionFilterStore } = useContext(AppContext);
-  const { collectionFilter } = collectionFilterStore;
-  const { isCodeLoaded } = codeStore;
+  const { codeStore, collectionStore } = useContext(AppContext);
+  const { collectionFilter } = collectionStore;
+  const { codes } = codeStore;
 
   useEffect(() => {
-    if (isCodeLoaded && !collectionFilter) {
-      collectionFilterStore.setFilter({
-        gradeCd: codeStore.findDetailCdsInMasterCdGroup(MASTER_CD.MON_GRADE),
-        mainAttrCd: codeStore.findDetailCdsInMasterCdGroup(MASTER_CD.MON_ATTRS),
+    if (codes && !collectionFilter) {
+      collectionStore.setCollectionFilter({
+        has: ['Y'],
+        gradeCd: codeStore.findDetailCdsInMasterCdGroup(
+          MASTER_CD.MON_GRADE
+        ) as string[],
+        mainAttrCd: codeStore.findDetailCdsInMasterCdGroup(
+          MASTER_CD.MON_ATTRS
+        ) as string[],
         subAttrCd: [''].concat(codeStore.findDetailCdsInMasterCdGroup(
           MASTER_CD.MON_ATTRS
         ) as string[]),
@@ -34,11 +39,12 @@ const FloatingFilterDrawer = () => {
         disabled: [],
       });
     }
-  }, [isCodeLoaded, codeStore, collectionFilter, collectionFilterStore]);
+  }, [codes, codeStore, collectionFilter, collectionStore]);
 
   const optionLists = useMemo(() => {
-    if (isCodeLoaded) {
+    if (codes) {
       return {
+        has: [{ label: '보유', value: 'Y' }, { label: '미보유', value: 'N' }],
         gradeCd: (codeStore.findMasterCdGroup(
           MASTER_CD.MON_GRADE
         ) as ICodeSnapshotOut[]).map(item => ({
@@ -87,11 +93,13 @@ const FloatingFilterDrawer = () => {
     } else {
       return null;
     }
-  }, [codeStore, isCodeLoaded]);
+  }, [codeStore, codes]);
 
   const filterActiveInfo = useMemo(() => {
     if (collectionFilter && optionLists) {
-      const filterKeys = Object.keys(toJS(collectionFilter)) as FilterKey[];
+      const filterKeys = Object.keys(
+        toJS(collectionFilter)
+      ) as CollectionFilterKey[];
       const activeKeys = [];
       let active = false;
       filterKeys.forEach(key => {
@@ -126,114 +134,160 @@ const FloatingFilterDrawer = () => {
       active={filterActiveInfo.active}
       title='필터'
     >
-      {collectionFilter && optionLists && (
+      {collectionFilter && collectionStore && optionLists && (
         <Collapse
           bordered={false}
           defaultActiveKey={filterActiveInfo.activeKeys}
         >
-          <Collapse.Panel header='등급' key={FilterKey.gradeCd}>
+          <Collapse.Panel header='보유여부' key={CollectionFilterKey.has}>
             <CheckGroup
-              optionList={optionLists.gradeCd}
+              optionList={optionLists.has}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(FilterKey.gradeCd, checkedList)
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.has,
+                  checkedList
+                )
               }
-              checkedList={collectionFilter.gradeCd}
+              checkedList={collectionFilter.has}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.gradeCd) > -1
+                collectionFilter.disabled.indexOf(CollectionFilterKey.has) > -1
               }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='주속성' key={FilterKey.mainAttrCd}>
+          <Collapse.Panel header='등급' key={CollectionFilterKey.gradeCd}>
+            <CheckGroup
+              optionList={optionLists.gradeCd}
+              onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.gradeCd,
+                  checkedList
+                )
+              }
+              checkedList={collectionFilter.gradeCd}
+              disabled={
+                collectionFilter.disabled.indexOf(CollectionFilterKey.gradeCd) >
+                -1
+              }
+            />
+          </Collapse.Panel>
+          <Collapse.Panel header='주속성' key={CollectionFilterKey.mainAttrCd}>
             <CheckGroup
               optionList={optionLists.mainAttrCd}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(
-                  FilterKey.mainAttrCd,
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.mainAttrCd,
                   checkedList
                 )
               }
               checkedList={collectionFilter.mainAttrCd}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.mainAttrCd) > -1
+                collectionFilter.disabled.indexOf(
+                  CollectionFilterKey.mainAttrCd
+                ) > -1
               }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='부속성' key={FilterKey.subAttrCd}>
+          <Collapse.Panel header='부속성' key={CollectionFilterKey.subAttrCd}>
             <CheckGroup
               optionList={optionLists.subAttrCd}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(
-                  FilterKey.subAttrCd,
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.subAttrCd,
                   checkedList
                 )
               }
               checkedList={collectionFilter.subAttrCd}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.subAttrCd) > -1
+                collectionFilter.disabled.indexOf(
+                  CollectionFilterKey.subAttrCd
+                ) > -1
               }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='코스트' key={FilterKey.cost}>
+          <Collapse.Panel header='코스트' key={CollectionFilterKey.cost}>
             <CheckGroup
               optionList={optionLists.cost}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(FilterKey.cost, checkedList)
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.cost,
+                  checkedList
+                )
               }
               checkedList={collectionFilter.cost}
-              disabled={collectionFilter.disabled.indexOf(FilterKey.cost) > -1}
+              disabled={
+                collectionFilter.disabled.indexOf(CollectionFilterKey.cost) > -1
+              }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='랭크' key={FilterKey.rankCd}>
+          <Collapse.Panel header='랭크' key={CollectionFilterKey.rankCd}>
             <CheckGroup
               optionList={optionLists.rankCd}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(FilterKey.rankCd, checkedList)
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.rankCd,
+                  checkedList
+                )
               }
               checkedList={collectionFilter.rankCd}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.rankCd) > -1
+                collectionFilter.disabled.indexOf(CollectionFilterKey.rankCd) >
+                -1
               }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='세대' key={FilterKey.generation}>
+          <Collapse.Panel header='세대' key={CollectionFilterKey.generation}>
             <CheckGroup
               optionList={optionLists.generation}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(
-                  FilterKey.generation,
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.generation,
                   checkedList
                 )
               }
               checkedList={collectionFilter.generation}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.generation) > -1
+                collectionFilter.disabled.indexOf(
+                  CollectionFilterKey.generation
+                ) > -1
               }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='진화가능여부' key={FilterKey.evolutable}>
+          <Collapse.Panel
+            header='진화가능여부'
+            key={CollectionFilterKey.evolutable}
+          >
             <CheckGroup
               optionList={optionLists.evolutable}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(
-                  FilterKey.evolutable,
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.evolutable,
                   checkedList
                 )
               }
               checkedList={collectionFilter.evolutable}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.evolutable) > -1
+                collectionFilter.disabled.indexOf(
+                  CollectionFilterKey.evolutable
+                ) > -1
               }
             />
           </Collapse.Panel>
-          <Collapse.Panel header='수비배치여부' key={FilterKey.defense}>
+          <Collapse.Panel
+            header='수비배치여부'
+            key={CollectionFilterKey.defense}
+          >
             <CheckGroup
               optionList={optionLists.defense}
               onChangeCheckedList={(checkedList: CheckboxValueType[]) =>
-                collectionFilter.setFilterValue(FilterKey.defense, checkedList)
+                collectionStore.updateCollectionFilter(
+                  CollectionFilterKey.defense,
+                  checkedList
+                )
               }
               checkedList={collectionFilter.defense}
               disabled={
-                collectionFilter.disabled.indexOf(FilterKey.defense) > -1
+                collectionFilter.disabled.indexOf(CollectionFilterKey.defense) >
+                -1
               }
             />
           </Collapse.Panel>

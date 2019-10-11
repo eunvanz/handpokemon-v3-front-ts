@@ -3,10 +3,10 @@ import { PageHeader, Affix, Button } from 'antd';
 
 import './Header.less';
 import imgLogo from '../../../imgs/logo.png';
-import { IUserInstance } from '../../../stores/models/user';
+import { IUser } from '../../../stores/models/userModel';
 
 interface IHeaderViewProps {
-  user?: IUserInstance;
+  user?: IUser;
   onClickLogout: () => void;
   isDrawerOpen: boolean;
   onToggleDrawer: (isDrawerOpen: boolean) => void;

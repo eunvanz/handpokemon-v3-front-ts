@@ -1,7 +1,6 @@
 import React, { useContext, useCallback } from 'react';
 import AppContext from '../../contexts/AppContext';
 import BaseLayoutView from './BaseLayoutView';
-import { getSnapshot } from 'mobx-state-tree';
 import { ROUTES } from '../../App';
 import { isScreenSize } from '../../libs/screenSize';
 import { DRAWER_DEFAULT_OPEN_SCREEN_SIZE } from '../../constants/styles';
@@ -43,7 +42,7 @@ const BaseLayoutContainer: React.FC = ({ children }) => {
     <BaseLayoutView
       onToggleDrawer={handleOnToggleDrawer}
       isDrawerOpen={uiStore.isDrawerOpen}
-      userStore={getSnapshot(userStore)}
+      userStore={userStore}
       children={children}
       onClickLogout={handleOnClickLogout}
       onChangeRoute={handleOnChangeRoute}

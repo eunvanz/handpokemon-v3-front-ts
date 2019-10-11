@@ -1,97 +1,82 @@
-import { types, SnapshotOut, cast } from 'mobx-state-tree';
-import User, { IUserSnapshotIn } from './models/user';
-import Collection from './models/collection';
-import Book from './models/book';
-import UserAchievement from './models/userAchievements';
-import UserItem from './models/userItem';
-import api from '../api';
-import { flow } from '../libs/flow';
+import { observable, flow, action } from 'mobx';
+import api from '../api/index';
+import { IUser } from './models/userModel';
+import { ICollection } from './models/collectionModel';
+import { IBook } from './models/bookModel';
+import { IAchievement } from './models/achievementModel';
+import { IUserItem } from './models/userItemModel';
 import { alertError } from '../libs/hpUtils';
 
-const UserStore = types
-  .model('UserStore', {
-    user: types.maybe(User),
-    isUserLoading: false,
-    userCollections: types.maybe(types.array(Collection)),
-    userBooks: types.maybe(types.array(Book)),
-    userAchievements: types.maybe(types.array(UserAchievement)),
-    userItems: types.maybe(types.array(UserItem)),
-  })
-  .actions(self => {
-    const fetchUserCollectionsWithToken = flow(function*() {
+export default class UserStore {
+  @observable user?: IUser = undefined;
+  @observable userCollections?: ICollection[] = undefined;
+  @observable userBooks?: IBook = undefined;
+  @observable userAchievements?: IAchievement[] = undefined;
+  @observable userItem?: IUserItem = undefined;
+
+  constructor() {
+    const auth = localStorage.getItem('auth');
+    if (auth) {
+      this.signInUserWithToken();
+    }
+  }
+
+  fetchUserCollectionsWithToken = flow(function*() {
+    try {
       const collections = yield api.collection.getUserCollectionsWithToken();
-      self.userCollections = cast(collections);
-    });
-
-    const signInUserWithToken = flow(function*() {
-      self.isUserLoading = true;
-      try {
-        const user = yield api.user.signInWithToken();
-        self.user = cast(user);
-        fetchUserCollectionsWithToken();
-      } catch (error) {
-        alertError(error);
-      } finally {
-        self.isUserLoading = false;
-      }
-    });
-
-    const signInUser = flow(function*({
-      email,
-      password,
-    }: {
-      email: string;
-      password: string;
-    }) {
-      self.isUserLoading = true;
-      try {
-        const { user, token } = yield api.user.signIn({
-          email,
-          password,
-        });
-        localStorage.setItem('auth', token);
-        fetchUserCollectionsWithToken();
-        self.user = cast(user);
-      } catch (error) {
-        alertError(error);
-      } finally {
-        self.isUserLoading = false;
-      }
-    });
-
-    const signUp = flow(function*(userToPost: IUserSnapshotIn) {
-      try {
-        const { user, token } = yield api.user.signUpUser(userToPost);
-        localStorage.setItem('auth', token);
-        self.user = user;
-      } catch (error) {
-        alertError(error);
-      }
-    });
-
-    return {
-      signInUser,
-      logout: () => {
-        localStorage.removeItem('auth');
-        self.user = undefined;
-        self.userCollections = undefined;
-        self.userBooks = undefined;
-        self.userAchievements = undefined;
-        self.userItems = undefined;
-        self.isUserLoading = false;
-      },
-      signInUserWithToken,
-      fetchUserCollectionsWithToken,
-      signUp,
-      afterCreate: () => {
-        const auth = localStorage.getItem('auth');
-        if (auth) {
-          signInUserWithToken();
-        }
-      },
-    };
+      this.userCollections = collections;
+    } catch (error) {
+      alertError(error);
+    }
   });
 
-export type IUserStore = SnapshotOut<typeof UserStore>;
+  signInUserWithToken = flow(function*() {
+    try {
+      const user = yield api.user.signInWithToken();
+      this.user = user;
+      this.fetchUserCollectionsWithToken();
+    } catch (error) {
+      alertError(error);
+    }
+  });
 
-export default UserStore;
+  signInUser = flow(function*({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) {
+    try {
+      const { user, token } = yield api.user.signIn({
+        email,
+        password,
+      });
+      localStorage.setItem('auth', token);
+      this.fetchUserCollectionsWithToken();
+      this.user = user;
+    } catch (error) {
+      alertError(error);
+    }
+  });
+
+  signUp = flow(function*(userToPost: IUser) {
+    try {
+      const { user, token } = yield api.user.signUpUser(userToPost);
+      localStorage.setItem('auth', token);
+      this.user = user;
+    } catch (error) {
+      alertError(error);
+    }
+  });
+
+  @action
+  logout = () => {
+    this.user = undefined;
+    this.userCollections = undefined;
+    this.userBooks = undefined;
+    this.userAchievements = undefined;
+    this.userItem = undefined;
+    localStorage.removeItem('auth');
+  };
+}

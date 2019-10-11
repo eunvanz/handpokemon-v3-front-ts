@@ -1,52 +1,41 @@
-import { types, SnapshotOut, cast } from 'mobx-state-tree';
-import Code from './models/code';
-import api from '../api';
-import { flow } from '../libs/flow';
+import { observable, flow, action } from 'mobx';
+import { ICode } from './models/codeModel';
+import api from '../api/index';
 import { alertError } from '../libs/hpUtils';
-import { toJS } from 'mobx';
 
-const CodeStore = types
-  .model('CodeStore', {
-    isCodeLoaded: types.optional(types.boolean, false),
-    codes: types.optional(types.array(Code), []),
-  })
-  .actions(self => {
-    const fetchCodes = flow(function*() {
-      try {
-        const codes = yield api.code.getCodes();
-        self.codes = cast(codes);
-        self.isCodeLoaded = true;
-      } catch (error) {
-        alertError(error);
-      }
-    });
-    return {
-      fetchCodes,
-      afterCreate: () => {
-        fetchCodes();
-      },
-    };
-  })
-  .views(self => {
-    const { codes } = self;
-    return {
-      findDetailCdNmByDetailCd: (detailCd: string) => {
-        return codes && toJS(codes).find(item => item.detailCd === detailCd);
-      },
-      findMasterCdGroup: (masterCd: string) => {
-        return codes && toJS(codes).filter(item => item.masterCd === masterCd);
-      },
-      findDetailCdsInMasterCdGroup: (masterCd: string) => {
-        return (
-          codes &&
-          codes
-            .filter(item => item.masterCd === masterCd)
-            .map(item => item.detailCd)
-        );
-      },
-    };
+export default class CodeStore {
+  @observable codes?: ICode[] = undefined;
+
+  constructor() {
+    this.fetchCodes();
+  }
+
+  fetchCodes = flow(function*() {
+    try {
+      const codes = yield api.code.getCodes();
+      this.codes = codes;
+    } catch (error) {
+      alertError(error);
+    }
   });
 
-export type ICodeStore = SnapshotOut<typeof CodeStore>;
+  @action
+  findDetailCdNmByDetailCd = (detailCd: string) => {
+    return this.codes && this.codes.find(item => item.detailCd === detailCd);
+  };
 
-export default CodeStore;
+  @action
+  findMasterCdGroup = (masterCd: string) => {
+    return this.codes && this.codes.filter(item => item.masterCd === masterCd);
+  };
+
+  @action
+  findDetailCdsInMasterCdGroup = (masterCd: string) => {
+    return (
+      this.codes &&
+      this.codes
+        .filter(item => item.masterCd === masterCd)
+        .map(item => item.detailCd)
+    );
+  };
+}

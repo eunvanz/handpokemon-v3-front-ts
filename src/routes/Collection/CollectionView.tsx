@@ -21,9 +21,7 @@ import { observer } from 'mobx-react';
 import AppContext from '../../contexts/AppContext';
 import { useParams } from 'react-router';
 import FloatingFilterDrawer from '../../components/FloatingFilterDrawer';
-import { isCollection } from '../../libs/hpUtils';
 import { toJS } from 'mobx';
-import { clone } from 'mobx-state-tree';
 
 interface ICollectionStateSectionProps {
   codes: ICodeInstance[];
@@ -79,17 +77,11 @@ export interface ISelectConfigs {
 }
 
 const CollectionView = () => {
-  const {
-    userStore,
-    codeStore,
-    collectionStore,
-    collectionFilterStore,
-  } = useContext(AppContext);
+  const { userStore, codeStore, collectionStore } = useContext(AppContext);
   const { id } = useParams();
   const { user, userCollections } = userStore;
-  const { codes, isCodeLoaded } = codeStore;
-  const { mons, collections } = collectionStore;
-  const { collectionFilter } = collectionFilterStore;
+  const { codes } = codeStore;
+  const { mons, collections, collectionFilter } = collectionStore;
 
   const selectable = useMemo(() => {
     return false;
@@ -97,7 +89,6 @@ const CollectionView = () => {
 
   const monCounts = useMemo(() => {
     if (collections && mons && codes) {
-      console.log('collections', collections.toJSON());
       const result: { total: number; cnt: number; key: string }[] = [];
       (codeStore.findDetailCdsInMasterCdGroup(
         MASTER_CD.MON_GRADE
@@ -115,8 +106,6 @@ const CollectionView = () => {
     }
   }, [mons, codeStore, codes, collections]);
 
-  console.log('monCounts', monCounts);
-
   const selectConfigs = useMemo(() => {
     return {
       message: '',
@@ -133,7 +122,7 @@ const CollectionView = () => {
     }
   }, [id, userCollections, collectionStore]);
 
-  const isLoading = !isCodeLoaded || !collections || !monCounts;
+  const isLoading = !codes || !collections || !monCounts;
 
   const list = useMemo(() => {
     console.log('collectionFilter', collectionFilter);

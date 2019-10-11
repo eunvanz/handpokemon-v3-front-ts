@@ -1,32 +1,26 @@
 import { ROLE, GRADE } from '../constants/codes';
 import MessageModal from '../components/MessageModal/index';
-import { IUserInstance } from '../stores/models/user';
-import { IMonInstance } from '../stores/models/mon';
-import { ICollectionInstance } from '../stores/models/collection';
-import { IBook } from '../stores/models/book';
-import { IUserAchievement } from '../stores/models/userAchievements';
+import { IBook } from '../stores/models/bookModel';
+import { IUserAchievement } from '../stores/models/userAchievementModel';
 import { MessageModalType } from '../components/MessageModal/MessageModal';
+import { IUser } from '../stores/models/userModel';
+import { ICollection } from '../stores/models/collectionModel';
+import { IMon } from '../stores/models/monModel';
 
-export const isAdminUser = (user: IUserInstance) => {
+export const isAdminUser = (user: IUser) => {
   if (!user) return false;
   return user.role === ROLE.ADMIN;
 };
 
-export const isCollection = (
-  mon: ICollectionInstance | IMonInstance
-): mon is ICollectionInstance => {
-  return (mon as ICollectionInstance).mon !== undefined;
+export const isCollection = (mon: ICollection | IMon): mon is ICollection => {
+  return (mon as ICollection).mon !== undefined;
 };
 
-export const isMon = (
-  mon: ICollectionInstance | IMonInstance
-): mon is IMonInstance => {
-  return (mon as IMonInstance).cost !== undefined;
+export const isMon = (mon: ICollection | IMon): mon is IMon => {
+  return (mon as IMon).cost !== undefined;
 };
 
-export const getMonImageUrl = (
-  monOrCol: IMonInstance | ICollectionInstance
-) => {
+export const getMonImageUrl = (monOrCol: IMon | ICollection) => {
   if (isCollection(monOrCol)) {
     const filteredMonImage = monOrCol.monImages.filter(
       monImage => monImage.seq === monOrCol.imageSeq
@@ -54,19 +48,6 @@ export const getGradeCdFromTitle = (title: string) => {
   else if (title.endsWith('마스터')) return GRADE.ELITE;
 };
 
-// export const proceedPickActions = ({
-//   viewActions,
-//   userActions,
-//   prevUserCollections,
-//   achieved,
-//   pickedMons
-// }) => {
-//   viewActions.receiveView('prevUserCollections', prevUserCollections);
-//   viewActions.receiveView('pickedMons', pickedMons);
-//   viewActions.receiveView('achieved', achieved);
-//   userActions.signInUserWithToken();
-// };
-
 export const getBonusPctByAttrCdFromBook = (attrCd: string, books: IBook[]) => {
   const attrBooks = books.filter(book => book.attrCd === attrCd);
   const total = attrBooks.reduce(
@@ -81,7 +62,7 @@ export const getTotalFromColAndUser = ({
   userBooks,
   userAchievements,
 }: {
-  col: ICollectionInstance;
+  col: ICollection;
   userBooks?: IBook[];
   userAchievements?: IUserAchievement[];
 }) => {
@@ -99,7 +80,7 @@ export const getTotalFromColAndUser = ({
 };
 
 export const getTotalbuffFromColAndUser = (
-  col: ICollectionInstance,
+  col: ICollection,
   userBooks: IBook[]
 ) => {
   const {
@@ -137,7 +118,7 @@ export const getTotalbuffFromColAndUser = (
   }, 0);
 };
 
-export const isUserBookMon = (books: IBook[], col: ICollectionInstance) => {
+export const isUserBookMon = (books: IBook[], col: ICollection) => {
   return !!books.filter(item => item.colId === col.id)[0];
 };
 

@@ -3,24 +3,24 @@ import { Row, Card, Affix, Button, Col, Empty } from 'antd';
 import { Waypoint } from 'react-waypoint';
 import MonCard from '../MonCard';
 import BottomTotal from '../BottomTotal';
-import { ICollectionInstance } from '../../stores/models/collection';
-import { ICodeSnapshotOut } from '../../stores/models/code';
 import { ISelectConfigs } from '../../routes/Collection/CollectionView';
-import { IUserInstance } from '../../stores/models/user';
-import { IMonInstance } from '../../stores/models/mon';
 import { isCollection } from '../../libs/hpUtils';
+import { ICollection } from '../../stores/models/collectionModel';
+import { IMon } from '../../stores/models/monModel';
+import { ICode } from '../../stores/models/codeModel';
+import { IUser } from '../../stores/models/userModel';
 
 interface ICollectionListProps {
-  list: (ICollectionInstance | IMonInstance)[];
-  codes: ICodeSnapshotOut[];
+  list: (ICollection | IMon)[];
+  codes: ICode[];
   mixable?: boolean;
-  onClickMix?: (targetCol: ICollectionInstance) => void;
+  onClickMix?: (targetCol: ICollection) => void;
   selectable?: boolean;
   selectConfigs?: ISelectConfigs;
   evolutable?: boolean;
-  onClickEvolute?: (targetCol: ICollectionInstance) => void;
-  user: IUserInstance;
-  selectedMons?: ICollectionInstance[];
+  onClickEvolute?: (targetCol: ICollection) => void;
+  user: IUser;
+  selectedMons?: ICollection[];
 }
 
 const CollectionList = ({

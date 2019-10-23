@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, memo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Menu, Icon, List, Avatar, Tag } from 'antd';
 import './Sidebar.less';
 import CreditTag from '../../../components/CreditTag';
@@ -6,6 +6,7 @@ import { CreditType } from '../../../constants/rules';
 import { useHistory } from 'react-router';
 import { IUser } from '../../../stores/models/userModel';
 import { IUserItem } from '../../../stores/models/userItemModel';
+import { observer } from 'mobx-react';
 
 interface ISidebarViewProps {
   user?: IUser;
@@ -212,4 +213,4 @@ const SidebarView = ({
   );
 };
 
-export default memo(SidebarView);
+export default observer(SidebarView);

@@ -1,9 +1,13 @@
-import React, { memo } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { Card, Button, Form, Input, Icon } from 'antd';
 import { Link } from 'react-router-dom';
 import ContentWrapper from '../../components/ContentWrapper';
 import imgLogo from '../../imgs/logo.png';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
+import AppContext from '../../contexts/AppContext';
+import { useHistory } from 'react-router';
+import MessageModal from '../../components/MessageModal/index';
+import { MessageModalType } from '../../components/MessageModal/MessageModal';
 
 interface ISignInViewProps {
   form: WrappedFormUtils;
@@ -11,7 +15,28 @@ interface ISignInViewProps {
   isLoading: boolean;
 }
 
-const SignInView = ({ form, onClickLogin, isLoading }: ISignInViewProps) => {
+const SignInView = ({ form }: ISignInViewProps) => {
+  const { userStore } = useContext(AppContext);
+  const { signInUser, isLoading } = userStore;
+  const history = useHistory();
+
+  const handleOnClickLogin = useCallback(() => {
+    form.validateFields(async (err, values) => {
+      if (!err) {
+        try {
+          await signInUser(values);
+        } catch (error) {
+          return MessageModal({
+            type: MessageModalType.error,
+            content: error.message,
+          });
+        }
+        if (history.length > 1) history.go(-1);
+        else history.push('/');
+      }
+    });
+  }, [form, history, signInUser]);
+
   return (
     <ContentWrapper>
       <Card
@@ -40,7 +65,7 @@ const SignInView = ({ form, onClickLogin, isLoading }: ISignInViewProps) => {
                 }
                 size='large'
                 placeholder='이메일 주소'
-                onPressEnter={onClickLogin}
+                onPressEnter={handleOnClickLogin}
               />
             )}
           </Form.Item>
@@ -55,7 +80,7 @@ const SignInView = ({ form, onClickLogin, isLoading }: ISignInViewProps) => {
                 size='large'
                 type='password'
                 placeholder='비밀번호'
-                onPressEnter={onClickLogin}
+                onPressEnter={handleOnClickLogin}
               />
             )}
           </Form.Item>
@@ -67,7 +92,7 @@ const SignInView = ({ form, onClickLogin, isLoading }: ISignInViewProps) => {
               block
               size='large'
               loading={isLoading}
-              onClick={onClickLogin}
+              onClick={handleOnClickLogin}
               icon='login'
             >
               로그인
@@ -82,4 +107,4 @@ const SignInView = ({ form, onClickLogin, isLoading }: ISignInViewProps) => {
   );
 };
 
-export default memo(SignInView);
+export default Form.create()(SignInView);

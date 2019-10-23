@@ -8,14 +8,14 @@ import SpinContainer from '../../components/SpinContainer';
 import MessageModal from '../../components/MessageModal/index';
 import { MessageModalType } from '../../components/MessageModal/MessageModal';
 import { useHistory } from 'react-router';
-import { ICollectionSnapshotOut } from '../../stores/models/collection';
+import { ICollection } from '../../stores/models/collectionModel';
 
 const SignUpContainer = ({ form }: { form: WrappedFormUtils }) => {
   const history = useHistory();
   const { userStore, codeStore } = useContext(AppContext);
-  const [startPicks, setStartPicks] = useState<
-    ICollectionSnapshotOut[] | undefined
-  >(undefined);
+  const [startPicks, setStartPicks] = useState<ICollection[] | undefined>(
+    undefined
+  );
   const { codes } = codeStore;
 
   useEffect(() => {

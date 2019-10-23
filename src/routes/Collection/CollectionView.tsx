@@ -4,9 +4,9 @@ import React, {
   useContext,
   useEffect,
   useCallback,
+  useState,
 } from 'react';
 import { ICodeInstance } from '../../stores/models/code';
-import { ICollectionInstance } from '../../stores/models/collection';
 import ContentWrapper from '../../components/ContentWrapper/index';
 import SpinContainer from '../../components/SpinContainer';
 import { Card, Row, Col, Progress } from 'antd';
@@ -22,6 +22,12 @@ import AppContext from '../../contexts/AppContext';
 import { useParams } from 'react-router';
 import FloatingFilterDrawer from '../../components/FloatingFilterDrawer';
 import { toJS } from 'mobx';
+import { ICollection } from '../../stores/models/collectionModel';
+import ConfirmModal from '../../components/ConfirmModal/index';
+import history from '../../libs/history';
+import MessageModal from '../../components/MessageModal/index';
+import { MessageModalType } from '../../components/MessageModal/MessageModal';
+import { CollectionModes } from '../../stores/collectionStore';
 
 interface ICollectionStateSectionProps {
   codes: ICodeInstance[];
@@ -72,20 +78,35 @@ const CollectionStateSection = ({
 
 export interface ISelectConfigs {
   message: ReactNode;
-  onSelect: (targetCol: ICollectionInstance) => void;
+  onSelect: (targetCol: ICollection) => void;
   onCancel: () => void;
 }
 
 const CollectionView = () => {
   const { userStore, codeStore, collectionStore } = useContext(AppContext);
   const { id } = useParams();
-  const { user, userCollections } = userStore;
+
+  const user = useMemo(() => {
+    // if (id === 'user') return userStore.user
+    return userStore.user;
+  }, [userStore.user]);
+
   const { codes } = codeStore;
-  const { mons, collections, collectionFilter } = collectionStore;
+  const {
+    mons,
+    collections,
+    cancelMix,
+    mixCollections,
+    mode,
+  } = collectionStore;
+  const { filteredList } = collectionStore;
+
+  const [selectConfigs, setSelectConfigs] = useState<ISelectConfigs>();
+  const [proceeding, setProceeding] = useState(false);
 
   const selectable = useMemo(() => {
-    return false;
-  }, []);
+    return mode === CollectionModes.mix;
+  }, [mode]);
 
   const monCounts = useMemo(() => {
     if (collections && mons && codes) {
@@ -106,37 +127,76 @@ const CollectionView = () => {
     }
   }, [mons, codeStore, codes, collections]);
 
-  const selectConfigs = useMemo(() => {
-    return {
-      message: '',
-      onSelect: (targetCol: ICollectionInstance) => {},
-      onCancel: () => {},
-    };
-  }, []);
-
-  const onClickMix = useCallback((targetCol: ICollectionInstance) => {}, []);
-
   useEffect(() => {
-    if (id === 'user' && userCollections) {
-      collectionStore.setCollections(toJS(userCollections));
+    if (id === 'user' && user && user.collections) {
+      collectionStore.setCollections(toJS(user.collections));
     }
-  }, [id, userCollections, collectionStore]);
+  }, [id, user, collectionStore]);
 
   const isLoading = !codes || !collections || !monCounts;
 
-  const list = useMemo(() => {
-    console.log('collectionFilter', collectionFilter);
-    if (collectionFilter)
-      console.log(
-        'collectionFilter',
-        collectionStore.getFilteredList(collectionFilter)
-      );
-    return collectionFilter
-      ? collectionStore.getFilteredList(collectionFilter)
-      : collections;
-  }, [collectionFilter, collectionStore, collections]);
-
-  console.log('list', list);
+  const handleOnClickMix = useCallback(
+    (col: ICollection) => {
+      setSelectConfigs({
+        message: (
+          <div>
+            <span className='c-primary fw-700'>{col.mon.name}</span>와(과)
+            교배할 포켓몬을 선택해주세요.
+          </div>
+        ),
+        onSelect: targetCol => {
+          const proceed = () => {
+            ConfirmModal({
+              title: (
+                <div>
+                  <span className='c-primary fw-700'>{col.mon.name}</span>
+                  와(과){' '}
+                  <span className='c-primary fw-700'>{targetCol.mon.name}</span>
+                  을(를) 교배하시겠습니까?
+                </div>
+              ),
+              content:
+                '교배하는 포켓몬의 레벨이 1 하락하고, 레벨 1의 포켓몬의 경우 영원히 사라집니다.',
+              onOk: async () => {
+                setProceeding(true);
+                await mixCollections([col.id, targetCol.id]);
+                history.replace('/pick');
+              },
+            });
+          };
+          const colBook =
+            user &&
+            user.books &&
+            user.books.find(item => item.colId === targetCol.id);
+          if (colBook) {
+            if (targetCol.level === 1) {
+              MessageModal({
+                type: MessageModalType.error,
+                title: '교배 불가',
+                content:
+                  '도감에 등록되어있는 포켓몬입니다. 도감에서 제외하거나 다음 레벨에서 교배해주세요!',
+              });
+            } else {
+              ConfirmModal({
+                title: '도감에 등록된 포켓몬',
+                content:
+                  '도감에 등록되어있는 포켓몬입니다. 교배하게 되면 도감보너스가 하락합니다. 그래도 교배하시겠습니까?',
+                onOk: () => {
+                  proceed();
+                },
+              });
+            }
+          } else {
+            proceed();
+          }
+        },
+        onCancel: () => {
+          cancelMix();
+        },
+      });
+    },
+    [mixCollections, user, cancelMix]
+  );
 
   return (
     <ContentWrapper>
@@ -144,14 +204,15 @@ const CollectionView = () => {
       {collections && monCounts && codes && !selectable && (
         <CollectionStateSection codes={codes} monCounts={monCounts} />
       )}
-      {codes && collections && user && (
+      {codes && filteredList && user && (
         <CollectionList
           selectable={selectable}
           selectConfigs={selectConfigs}
-          list={list}
+          list={filteredList}
           codes={codes}
-          onClickMix={onClickMix}
           user={user}
+          onClickMix={handleOnClickMix}
+          proceeding={proceeding}
         />
       )}
       <FloatingFilterDrawer />

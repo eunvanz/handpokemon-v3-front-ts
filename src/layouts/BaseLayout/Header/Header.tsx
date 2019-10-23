@@ -4,6 +4,7 @@ import { PageHeader, Affix, Button } from 'antd';
 import './Header.less';
 import imgLogo from '../../../imgs/logo.png';
 import { IUser } from '../../../stores/models/userModel';
+import { observer } from 'mobx-react';
 
 interface IHeaderViewProps {
   user?: IUser;
@@ -90,4 +91,4 @@ const HeaderView = ({
   );
 };
 
-export default HeaderView;
+export default observer(HeaderView);

@@ -1,18 +1,12 @@
 import { observable, flow, action } from 'mobx';
 import api from '../api/index';
 import { IUser } from './models/userModel';
-import { ICollection } from './models/collectionModel';
-import { IBook } from './models/bookModel';
-import { IAchievement } from './models/achievementModel';
-import { IUserItem } from './models/userItemModel';
 import { alertError } from '../libs/hpUtils';
+import { IResponseSignIn } from '../api/userApi';
 
 export default class UserStore {
   @observable user?: IUser = undefined;
-  @observable userCollections?: ICollection[] = undefined;
-  @observable userBooks?: IBook = undefined;
-  @observable userAchievements?: IAchievement[] = undefined;
-  @observable userItem?: IUserItem = undefined;
+  @observable isLoading: boolean = false;
 
   constructor() {
     const auth = localStorage.getItem('auth');
@@ -21,33 +15,48 @@ export default class UserStore {
     }
   }
 
-  fetchUserCollectionsWithToken = flow(function*() {
+  @action
+  fetchUserCollectionsWithToken = flow(function*(this: UserStore) {
     try {
-      const collections = yield api.collection.getUserCollectionsWithToken();
-      this.userCollections = collections;
+      this.isLoading = true;
+      if (this.user) {
+        const collections = yield api.collection.getUserCollectionsWithToken();
+        this.user.collections = collections;
+      }
     } catch (error) {
       alertError(error);
+    } finally {
+      this.isLoading = false;
     }
   });
 
-  signInUserWithToken = flow(function*() {
+  @action
+  signInUserWithToken = flow(function*(this: UserStore) {
     try {
+      this.isLoading = true;
       const user = yield api.user.signInWithToken();
       this.user = user;
       this.fetchUserCollectionsWithToken();
     } catch (error) {
       alertError(error);
+    } finally {
+      this.isLoading = false;
     }
   });
 
-  signInUser = flow(function*({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) {
+  @action
+  signInUser = flow(function*(
+    this: UserStore,
+    {
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }
+  ): Generator<Promise<IResponseSignIn>, void, any> {
     try {
+      this.isLoading = true;
       const { user, token } = yield api.user.signIn({
         email,
         password,
@@ -57,26 +66,31 @@ export default class UserStore {
       this.user = user;
     } catch (error) {
       alertError(error);
+    } finally {
+      this.isLoading = false;
     }
   });
 
-  signUp = flow(function*(userToPost: IUser) {
+  @action
+  signUp = flow(function*(
+    this: UserStore,
+    userToPost: IUser
+  ): Generator<Promise<IResponseSignIn>, void, any> {
     try {
+      this.isLoading = true;
       const { user, token } = yield api.user.signUpUser(userToPost);
       localStorage.setItem('auth', token);
       this.user = user;
     } catch (error) {
       alertError(error);
+    } finally {
+      this.isLoading = false;
     }
   });
 
   @action
   logout = () => {
     this.user = undefined;
-    this.userCollections = undefined;
-    this.userBooks = undefined;
-    this.userAchievements = undefined;
-    this.userItem = undefined;
     localStorage.removeItem('auth');
   };
 }

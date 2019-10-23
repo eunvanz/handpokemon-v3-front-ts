@@ -1,7 +1,7 @@
 import makeRequest from './makeRequest';
 import { IUserSnapshotOut, IUserSnapshotIn } from '../stores/models/user';
 
-interface IResponseSignIn {
+export interface IResponseSignIn {
   user: IUserSnapshotOut;
   token: string;
 }

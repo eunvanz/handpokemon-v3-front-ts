@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { Row, Col } from 'antd';
 import GradeTag from '../GradeTag';
 import AttrTag from '../AttrTag/index';
@@ -11,22 +11,44 @@ import {
   getBonusPctByAttrCdFromBook,
   getTotalbuffFromColAndUser,
   getbuffFromUserAchievements,
+  isCollection,
 } from '../../libs/hpUtils';
+import { IMon } from '../../stores/models/monModel';
+import { ICollection } from '../../stores/models/collectionModel';
+import { IUser } from '../../stores/models/userModel';
+import AppContext from '../../contexts/AppContext';
+import { observer } from 'mobx-react';
 
-const MonInfo = ({ mon, codes, nextMon, hideInfo, user, ...restProps }) => {
-  const thisMon = useMemo(() => mon.mon || mon, [mon]);
-  const col = useMemo(() => (mon.mon ? mon : null), [mon]);
+interface IMonInfoProps {
+  mon: IMon | ICollection;
+  nextMon?: ICollection;
+  hideInfo: boolean;
+  user: IUser;
+}
+
+const MonInfo = ({
+  mon,
+  nextMon,
+  hideInfo,
+  user,
+  ...restProps
+}: IMonInfoProps) => {
+  const { codeStore } = useContext(AppContext);
+  const { codes } = codeStore;
+
+  const thisMon = useMemo(() => (isCollection(mon) ? mon.mon : mon), [mon]);
+  const col = useMemo(() => (isCollection(mon) ? mon : null), [mon]);
   const total = useMemo(() => {
     if (nextMon) return getTotalFromColAndUser(nextMon, user);
     else return col ? getTotalFromColAndUser(col, user) : thisMon.total;
   }, [user, nextMon, col, thisMon.total]);
   const bonusPct = useMemo(() => {
     if (!col || !user) return 0;
-    return getBonusPctByAttrCdFromBook(col.mainAttrCd, user.books);
+    return getBonusPctByAttrCdFromBook(col.mainAttrCd, user.books || []);
   }, [user, col]);
   const titlebuffTotal = useMemo(() => {
     if (!col || !user) return 0;
-    return getbuffFromUserAchievements(user.achievements).reduce(
+    return getbuffFromUserAchievements(user.achievements || []).reduce(
       (accm, value) => accm + value,
       0
     );
@@ -139,4 +161,4 @@ const MonInfo = ({ mon, codes, nextMon, hideInfo, user, ...restProps }) => {
   );
 };
 
-export default memo(MonInfo);
+export default observer(MonInfo);

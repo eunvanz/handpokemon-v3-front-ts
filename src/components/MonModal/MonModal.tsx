@@ -1,6 +1,10 @@
-import React, { memo, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useContext } from 'react';
 import { Modal, Button, Row, Col } from 'antd';
-import { getMonImageUrl, isUserBookMon } from '../../libs/hpUtils';
+import {
+  getMonImageUrl,
+  isUserBookMon,
+  isCollection,
+} from '../../libs/hpUtils';
 import MonInfo from '../MonInfo/index';
 import MonStat from '../MonStat/index';
 import LevelTag from '../LevelTag/index';
@@ -9,31 +13,56 @@ import './MonModal.less';
 import imgEmpty from '../../imgs/empty-mon.png';
 import MessageModal from '../MessageModal/index';
 import ConfirmModal from '../ConfirmModal/index';
+import { IMon } from '../../stores/models/monModel';
+import { ICollection } from '../../stores/models/collectionModel';
+import AppContext from '../../contexts/AppContext';
+import { MessageModalType } from '../MessageModal/MessageModal';
+import { observer } from 'mobx-react';
+import history from '../../libs/history';
+import { IUser } from '../../stores/models/userModel';
+
+interface IMonModalProps {
+  visible: boolean;
+  onCancel: () => void;
+  mon: ICollection | IMon;
+  prevMon?: ICollection;
+  mixable?: boolean;
+  evolutable?: boolean;
+  hideInfo?: boolean;
+  user: IUser;
+}
 
 const MonModal = ({
   visible,
   onCancel,
   mon,
-  codes,
   prevMon,
-  onClickMix,
-  onClickEvolute,
   mixable,
   evolutable,
   hideInfo,
   user,
-}) => {
+}: IMonModalProps) => {
   const [flipped, setFlipped] = useState(false);
+  const { codeStore, collectionStore } = useContext(AppContext);
+  const { codes } = codeStore;
+  const { selectCollectionToMix, evoluteCollection } = collectionStore;
+
   const isEvolutableLevel = useMemo(() => {
-    if (!mon.nextMons || mon.nextMons.length === 0 || !mon.mon) return false;
-    else return mon.nextMons[0].requiredLv <= mon.level;
+    if (isCollection(mon)) {
+      return (
+        ((mon.nextMons[0] && mon.nextMons[0].requiredLv) || Number.MAX_VALUE) <=
+        mon.level
+      );
+    } else {
+      return false;
+    }
   }, [mon]);
 
   const handleOnClickMix = useCallback(() => {
-    if (isUserBookMon(user.books, mon)) {
+    if (user.books && isCollection(mon) && isUserBookMon(user.books, mon)) {
       if (mon.level === 1) {
         MessageModal({
-          type: 'error',
+          type: MessageModalType.error,
           title: '교배 불가',
           content:
             '도감에 등록되어있는 포켓몬입니다. 도감에서 제외하거나 다음 레벨에서 교배해주세요!',
@@ -44,20 +73,22 @@ const MonModal = ({
           content:
             '도감에 등록되어있는 포켓몬입니다. 교배하게 되면 도감보너스가 하락합니다. 그래도 교배하시겠습니까?',
           onOk: () => {
-            onClickMix(mon);
+            selectCollectionToMix(mon);
+            onCancel();
           },
         });
       }
-    } else {
-      onClickMix(mon);
+    } else if (isCollection(mon)) {
+      selectCollectionToMix(mon);
+      onCancel();
     }
-  }, [mon, user, onClickMix]);
+  }, [mon, user.books, onCancel, selectCollectionToMix]);
 
   const handleOnClickEvolute = useCallback(() => {
-    if (isUserBookMon(user.books, mon)) {
+    if (isCollection(mon) && user.books && isUserBookMon(user.books, mon)) {
       if (mon.nextMons[0].requiredLv === mon.level) {
         MessageModal({
-          type: 'error',
+          type: MessageModalType.error,
           title: '진화 불가',
           content:
             '도감에 등록되어있는 포켓몬입니다. 도감에서 제외하거나 다음 레벨에서 진화해주세요!',
@@ -68,18 +99,20 @@ const MonModal = ({
           content:
             '도감에 등록되어있는 포켓몬입니다. 진화하게 되면 도감보너스가 하락합니다. 그래도 진화하시겠습니까?',
           onOk: () => {
-            onClickEvolute(mon);
+            evoluteCollection(mon.id);
+            history.replace('/pick');
           },
         });
       }
-    } else {
-      onClickEvolute(mon);
+    } else if (isCollection(mon)) {
+      evoluteCollection(mon.id);
+      history.replace('/pick');
     }
-  }, [mon, user, onClickEvolute]);
+  }, [mon, evoluteCollection, user.books]);
 
   return (
     <Modal
-      id={`mon-modal-${mon.monId}`}
+      // id={`mon-modal-${isCollection(mon) ? mon.monId : mon.id}`}
       className='mon-modal'
       visible={visible}
       title='포켓몬 정보'
@@ -113,15 +146,15 @@ const MonModal = ({
             style={{ width: '100%', maxWidth: 200 }}
           />
           <div style={{ marginTop: 12 }}>
-            {prevMon && (
+            {isCollection(mon) && prevMon && (
               <LevelUpTag level={mon.level} prevLevel={prevMon.level} />
             )}
-            {!prevMon && mon.level && (
+            {isCollection(mon) && !prevMon && mon.level && (
               <LevelTag level={mon.level} evolutable={isEvolutableLevel} />
             )}
           </div>
           <div style={{ marginTop: 12 }}>
-            {mon.level && mixable && (
+            {isCollection(mon) && mon.level && mixable && (
               <Button
                 size='small'
                 onClick={handleOnClickMix}
@@ -130,7 +163,7 @@ const MonModal = ({
                 교배하기
               </Button>
             )}
-            {mon.level && evolutable && isEvolutableLevel && (
+            {isCollection(mon) && mon.level && evolutable && isEvolutableLevel && (
               <Button
                 size='small'
                 onClick={handleOnClickEvolute}
@@ -145,16 +178,15 @@ const MonModal = ({
           {!flipped && (
             <MonInfo
               mon={prevMon || mon}
-              codes={codes}
-              nextMon={prevMon ? mon : null}
-              hideInfo={hideInfo}
+              nextMon={isCollection(mon) && prevMon ? mon : undefined}
+              hideInfo={hideInfo || false}
               user={user}
             />
           )}
           {flipped && (
             <MonStat
               mon={prevMon || mon}
-              nextMon={prevMon ? mon : null}
+              nextMon={prevMon ? mon : undefined}
               user={user}
             />
           )}
@@ -164,4 +196,4 @@ const MonModal = ({
   );
 };
 
-export default memo(MonModal);
+export default observer(MonModal);

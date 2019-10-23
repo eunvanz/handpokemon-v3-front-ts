@@ -6,6 +6,7 @@ import Sidebar from './Sidebar/index';
 import Content from './Content/index';
 import './BaseLayout.less';
 import UserStore from '../../stores/userStore';
+import { observer } from 'mobx-react';
 
 interface IBaseLayoutViewProps {
   isDrawerOpen: boolean;
@@ -52,4 +53,4 @@ const BaseLayoutView = ({
   );
 };
 
-export default BaseLayoutView;
+export default observer(BaseLayoutView);

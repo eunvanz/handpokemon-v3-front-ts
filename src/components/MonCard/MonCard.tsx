@@ -4,6 +4,7 @@ import React, {
   useState,
   ComponentProps,
   ReactElement,
+  useContext,
 } from 'react';
 import { Card, Col, Icon } from 'antd';
 import { getMonImageUrl, isCollection } from '../../libs/hpUtils';
@@ -21,6 +22,7 @@ import { ICollection } from '../../stores/models/collectionModel';
 import { ColProps } from 'antd/lib/col';
 import { observer } from 'mobx-react-lite';
 import { IUser } from '../../stores/models/userModel';
+import AppContext from '../../contexts/AppContext';
 
 interface IMonCardProps {
   mon?: ICollection | IMon;
@@ -28,7 +30,7 @@ interface IMonCardProps {
   codes: any[];
   onClick?: () => void;
   withWrapper?: boolean;
-  prevMon?: IMon;
+  prevMon?: ICollection;
   mixable?: boolean;
   onClickMix?: (mon: ICollection) => void;
   evolutable?: boolean;
@@ -61,6 +63,7 @@ const MonCard = ({
   ...restProps
 }: IMonCardProps) => {
   const [showMonModal, setShowMonModal] = useState(false);
+  const { collectionStore } = useContext(AppContext);
 
   const handleOnClickInfo = useCallback(e => {
     e.stopPropagation();
@@ -70,9 +73,9 @@ const MonCard = ({
   const handleOnToggleFavorite = useCallback(
     e => {
       e.stopPropagation();
-      mon && isCollection(mon) && mon.toggleFavorite();
+      mon && isCollection(mon) && collectionStore.toggleFavorite(mon);
     },
-    [mon]
+    [mon, collectionStore]
   );
 
   const renderCover = useCallback(() => {
@@ -175,22 +178,6 @@ const MonCard = ({
     return false;
   }, [mon]);
 
-  const handleOnClickMix = useCallback(
-    (mon: ICollection) => {
-      setShowMonModal(false);
-      onClickMix && onClickMix(mon);
-    },
-    [onClickMix, setShowMonModal]
-  );
-
-  const handleOnClickEvolute = useCallback(
-    (mon: ICollection) => {
-      setShowMonModal(false);
-      onClickEvolute && onClickEvolute(mon);
-    },
-    [setShowMonModal, onClickEvolute]
-  );
-
   return (
     <Wrapper className='mon-card-wrapper' {...restProps}>
       {!isMock && mon && isCollection(mon) && (
@@ -229,18 +216,15 @@ const MonCard = ({
         <div className='attr-section'>{renderAttr()}</div>
       </Card>
       {bottomComponent}
-      {!isMock && (
+      {!isMock && mon && (
         <MonModal
           hideInfo={hideInfo}
           mon={mon}
           visible={showMonModal}
           onCancel={() => setShowMonModal(false)}
-          codes={codes}
           prevMon={prevMon}
           mixable={mixable}
-          onClickMix={handleOnClickMix}
           evolutable={evolutable}
-          onClickEvolute={handleOnClickEvolute}
           user={user}
         />
       )}

@@ -27,7 +27,7 @@ export const getMonImageUrl = (monOrCol: IMon | ICollection) => {
     )[0];
     if (filteredMonImage) return filteredMonImage.url;
   } else {
-    return null;
+    return undefined;
   }
 };
 
@@ -59,19 +59,17 @@ export const getBonusPctByAttrCdFromBook = (attrCd: string, books: IBook[]) => {
 
 export const getTotalFromColAndUser = ({
   col,
-  userBooks,
-  userAchievements,
+  user,
 }: {
   col: ICollection;
-  userBooks?: IBook[];
-  userAchievements?: IUserAchievement[];
+  user: IUser;
 }) => {
-  if (userAchievements && userBooks) {
+  if (user.achievements && user.books) {
     return (
       col.baseTotal +
       col.addedTotal +
-      getTotalbuffFromColAndUser(col, userBooks) +
-      getTotalbuffFromUserAchievements(userAchievements)
+      getTotalbuffFromColAndUser(col, user.books) +
+      getTotalbuffFromUserAchievements(user.achievements)
     );
   } else {
     // 회원가입 시

@@ -1,3 +1,8 @@
+import { ICollection } from './collectionModel';
+import { IBook } from './bookModel';
+import { IAchievement } from './achievementModel';
+import { IUserItem } from './userItemModel';
+
 export interface IUser {
   id: number;
   socialTypeCd: string;
@@ -21,4 +26,8 @@ export interface IUser {
   leagueCd: string;
   createdAt: string;
   updatedAt: string;
+  collections?: ICollection[];
+  books?: IBook[];
+  achievements?: IAchievement[];
+  items?: IUserItem[];
 }

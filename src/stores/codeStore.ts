@@ -10,7 +10,7 @@ export default class CodeStore {
     this.fetchCodes();
   }
 
-  fetchCodes = flow(function*() {
+  fetchCodes = flow(function*(this: CodeStore) {
     try {
       const codes = yield api.code.getCodes();
       this.codes = codes;

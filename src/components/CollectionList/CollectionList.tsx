@@ -9,31 +9,32 @@ import { ICollection } from '../../stores/models/collectionModel';
 import { IMon } from '../../stores/models/monModel';
 import { ICode } from '../../stores/models/codeModel';
 import { IUser } from '../../stores/models/userModel';
+import { observer } from 'mobx-react';
+import SpinContainer from '../SpinContainer';
 
 interface ICollectionListProps {
   list: (ICollection | IMon)[];
   codes: ICode[];
   mixable?: boolean;
-  onClickMix?: (targetCol: ICollection) => void;
   selectable?: boolean;
   selectConfigs?: ISelectConfigs;
   evolutable?: boolean;
-  onClickEvolute?: (targetCol: ICollection) => void;
   user: IUser;
   selectedMons?: ICollection[];
+  onClickMix: (col: ICollection) => void;
+  proceeding: boolean;
 }
 
 const CollectionList = ({
   list,
   codes,
   mixable,
-  onClickMix,
   selectable,
   selectConfigs, // { message, onSelect, onCancel }
   evolutable,
-  onClickEvolute,
   user,
   selectedMons,
+  proceeding,
 }: ICollectionListProps) => {
   const [page, setPage] = useState(1);
 
@@ -51,6 +52,7 @@ const CollectionList = ({
 
   return (
     <>
+      {proceeding && <SpinContainer />}
       {selectable && selectConfigs && (
         <Affix offsetTop={60}>
           <Card style={{ marginBottom: 12 }}>
@@ -81,8 +83,6 @@ const CollectionList = ({
             withWrapper
             mon={col}
             codes={codes}
-            onClickMix={onClickMix}
-            onClickEvolute={onClickEvolute}
             mixable={mixable}
             evolutable={evolutable}
             onClick={selectable ? () => handleOnClickMonCard(col) : undefined}
@@ -108,4 +108,4 @@ const CollectionList = ({
   );
 };
 
-export default CollectionList;
+export default observer(CollectionList);

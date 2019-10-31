@@ -5,13 +5,12 @@ import Header from './Header/index';
 import Sidebar from './Sidebar/index';
 import Content from './Content/index';
 import './BaseLayout.less';
-import UserStore from '../../stores/userStore';
-import { observer } from 'mobx-react';
+import { IUser } from '../../stores/models/userModel';
 
 interface IBaseLayoutViewProps {
   isDrawerOpen: boolean;
   onToggleDrawer: (show: boolean) => void;
-  userStore?: UserStore;
+  user?: IUser;
   onClickLogout: () => void;
   onChangeRoute: (route: string) => void;
   refreshUser: () => void;
@@ -21,7 +20,7 @@ interface IBaseLayoutViewProps {
 const BaseLayoutView = ({
   isDrawerOpen,
   onToggleDrawer,
-  userStore,
+  user,
   onClickLogout,
   onChangeRoute,
   refreshUser,
@@ -35,7 +34,7 @@ const BaseLayoutView = ({
       )}
     >
       <Header
-        user={userStore && userStore.user}
+        user={user}
         onToggleDrawer={onToggleDrawer}
         onClickLogout={onClickLogout}
         onChangeRoute={onChangeRoute}
@@ -43,7 +42,7 @@ const BaseLayoutView = ({
       />
       <Layout className='hp-content-layout'>
         <Sidebar
-          user={userStore && userStore.user}
+          user={user}
           onChangeRoute={onChangeRoute}
           refreshUser={refreshUser}
         />
@@ -53,4 +52,4 @@ const BaseLayoutView = ({
   );
 };
 
-export default observer(BaseLayoutView);
+export default BaseLayoutView;

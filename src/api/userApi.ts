@@ -1,8 +1,8 @@
 import makeRequest from './makeRequest';
-import { IUserSnapshotOut, IUserSnapshotIn } from '../stores/models/user';
+import { IUser } from '../stores/models/userModel';
 
 export interface IResponseSignIn {
-  user: IUserSnapshotOut;
+  user: IUser;
   token: string;
 }
 
@@ -14,10 +14,10 @@ export interface IUserApi {
     email: string;
     password: string;
   }) => Promise<IResponseSignIn>;
-  signInWithToken: () => Promise<IUserSnapshotOut>;
+  signInWithToken: () => Promise<IUser>;
   isDupEmail: (email: string) => Promise<boolean>;
   isDupNickname: (nickname: string) => Promise<boolean>;
-  signUpUser: (user: IUserSnapshotIn) => Promise<IResponseSignIn>;
+  signUpUser: (user: IUser) => Promise<IResponseSignIn>;
 }
 
 const userApi: IUserApi = {

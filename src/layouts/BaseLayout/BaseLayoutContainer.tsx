@@ -1,19 +1,27 @@
-import React, { useContext, useCallback } from 'react';
-import AppContext from '../../contexts/AppContext';
+import React, { useCallback } from 'react';
 import BaseLayoutView from './BaseLayoutView';
+import { useSelector, useDispatch } from 'react-redux';
 import { ROUTES } from '../../App';
 import { isScreenSize } from '../../libs/screenSize';
 import { DRAWER_DEFAULT_OPEN_SCREEN_SIZE } from '../../constants/styles';
 import ConfirmModal from '../../components/ConfirmModal/index';
 import { useHistory } from 'react-router';
-import { observer } from 'mobx-react';
+import { IStoreState } from '../../stores';
+import { showDrawer } from '../../stores/uiReducer';
+import { clearUser, signInUserWithToken } from '../../stores/userReducer';
 
 const BaseLayoutContainer: React.FC = ({ children }) => {
-  const { uiStore, userStore } = useContext(AppContext);
+  const { uiStore, userStore } = useSelector((state: IStoreState) => ({
+    uiStore: state.uiStore,
+    userStore: state.userStore,
+  }));
+
+  const dispatch = useDispatch();
+
   const history = useHistory();
 
   const handleOnToggleDrawer = (show: boolean) => {
-    show ? uiStore.showDrawer() : uiStore.hideDrawer();
+    dispatch(showDrawer(show));
   };
 
   const handleOnClickLogout = useCallback(() => {
@@ -21,7 +29,7 @@ const BaseLayoutContainer: React.FC = ({ children }) => {
       title: '로그아웃',
       content: '정말 로그아웃 하시겠습니까?',
       onOk: () => {
-        userStore.logout();
+        dispatch(clearUser());
         history.push(ROUTES.SIGN_IN);
       },
     });
@@ -29,20 +37,20 @@ const BaseLayoutContainer: React.FC = ({ children }) => {
 
   const handleOnChangeRoute = useCallback((route: string) => {
     if (isScreenSize.smallerThan(DRAWER_DEFAULT_OPEN_SCREEN_SIZE)) {
-      uiStore.hideDrawer();
+      dispatch(showDrawer(false));
     }
     history.push(route);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRefreshUser = useCallback(() => {
-    userStore.signInUserWithToken();
+    dispatch(signInUserWithToken());
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <BaseLayoutView
       onToggleDrawer={handleOnToggleDrawer}
       isDrawerOpen={uiStore.isDrawerOpen}
-      userStore={userStore}
+      user={userStore.user}
       children={children}
       onClickLogout={handleOnClickLogout}
       onChangeRoute={handleOnChangeRoute}
@@ -51,4 +59,4 @@ const BaseLayoutContainer: React.FC = ({ children }) => {
   );
 };
 
-export default observer(BaseLayoutContainer);
+export default BaseLayoutContainer;

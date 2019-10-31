@@ -1,7 +1,7 @@
 import { ICollection } from './collectionModel';
 import { IBook } from './bookModel';
-import { IAchievement } from './achievementModel';
 import { IUserItem } from './userItemModel';
+import { IUserAchievement } from './userAchievementModel';
 
 export interface IUser {
   id: number;
@@ -28,6 +28,6 @@ export interface IUser {
   updatedAt: string;
   collections?: ICollection[];
   books?: IBook[];
-  achievements?: IAchievement[];
+  achievements?: IUserAchievement[];
   items?: IUserItem[];
 }

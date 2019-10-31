@@ -57,13 +57,7 @@ export const getBonusPctByAttrCdFromBook = (attrCd: string, books: IBook[]) => {
   return Math.round(total / 12) / 10;
 };
 
-export const getTotalFromColAndUser = ({
-  col,
-  user,
-}: {
-  col: ICollection;
-  user: IUser;
-}) => {
+export const getTotalFromColAndUser = (col: ICollection, user: IUser) => {
   if (user.achievements && user.books) {
     return (
       col.baseTotal +

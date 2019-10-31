@@ -1,5 +1,4 @@
-import React, { useContext, useCallback, useState, useEffect } from 'react';
-import AppContext from '../../contexts/AppContext';
+import React, { useCallback, useState, useEffect } from 'react';
 import api from '../../api';
 import SignUpView from './SignUpView';
 import { Form } from 'antd';
@@ -12,15 +11,9 @@ import { ICollection } from '../../stores/models/collectionModel';
 
 const SignUpContainer = ({ form }: { form: WrappedFormUtils }) => {
   const history = useHistory();
-  const { userStore, codeStore } = useContext(AppContext);
   const [startPicks, setStartPicks] = useState<ICollection[] | undefined>(
     undefined
   );
-  const { codes } = codeStore;
-
-  useEffect(() => {
-    codeStore.fetchCodes();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkDupEmail = useCallback((email: string) => {
     return api.user.isDupEmail(email);

@@ -44,7 +44,7 @@ const SignUpContainer = ({ form }: { form: WrappedFormUtils }) => {
         }
         const res = await requestPostFile();
         const user = { ...values, profileImage: res ? res.url : null };
-        await userStore.signUp(user);
+        signUp;
         history.push('/pick');
         MessageModal({
           type: MessageModalType.success,

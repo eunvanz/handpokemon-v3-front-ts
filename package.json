@@ -13,7 +13,7 @@
     "@types/react-cropper": "^0.10.6",
     "@types/react-dom": "16.9.0",
     "@types/react-router-dom": "^4.3.5",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "babel-plugin-import": "^1.12.1",
     "classnames": "^2.2.6",
     "customize-cra": "^0.7.0",
